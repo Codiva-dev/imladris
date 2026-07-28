@@ -1,0 +1,376 @@
+// El Consejo de Elrond — esquema de los cinco dominios.
+// Nada fuera de Coordinación, Selección, Reunión, Bitácora, Mapa.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────────
+// Identidad
+// ─────────────────────────────────────────────
+
+model User {
+  id            String    @id @default(cuid())
+  name          String
+  email         String    @unique
+  emailVerified Boolean   @default(false)
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  memberships   CouncilMember[]
+  availabilities Availability[]
+  reflections   Reflection[]
+  sessions      Session[]
+  accounts      Account[]
+
+  @@map("users")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model Account {
+  id                    String    @id @default(cuid())
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@map("accounts")
+}
+
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("verifications")
+}
+
+// ─────────────────────────────────────────────
+// Consejo (contenedor raíz)
+// ─────────────────────────────────────────────
+
+enum CouncilPhase {
+  CONVOCATORIA
+  DISPONIBILIDAD
+  QUORUM_ALCANZADO
+  FECHA_CONFIRMADA
+  TEMA_SELECCIONADO
+  CUENTA_REGRESIVA
+  EN_CURSO
+  BITACORA_ABIERTA
+  CERRADO
+}
+
+enum QuorumThreshold {
+  P60  @map("60")
+  P70  @map("70")
+  P75  @map("75")
+  P80  @map("80")
+  P85  @map("85")
+  P90  @map("90")
+  P100 @map("100")
+}
+
+model Council {
+  id              String           @id @default(cuid())
+  name            String           @default("El Consejo de Elrond")
+  quorumThreshold QuorumThreshold  @default(P80)
+  phase           CouncilPhase     @default(CERRADO)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  members         CouncilMember[]
+  meetings        Meeting[]
+  topics          Topic[]
+  approaches      Approach[]
+  rules           CouncilRules?
+  knowledgeNodes  KnowledgeNode[]
+  knowledgeEdges  KnowledgeEdge[]
+
+  @@map("councils")
+}
+
+model CouncilMember {
+  id        String   @id @default(cuid())
+  councilId String
+  userId    String
+  role      MemberRole @default(MIEMBRO)
+  joinedAt  DateTime @default(now())
+
+  council   Council  @relation(fields: [councilId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([councilId, userId])
+  @@map("council_members")
+}
+
+enum MemberRole {
+  ORGANIZADOR
+  MIEMBRO
+}
+
+// ─────────────────────────────────────────────
+// Dominio 1 — Coordinación
+// ─────────────────────────────────────────────
+
+model Meeting {
+  id          String       @id @default(cuid())
+  councilId   String
+  phase       CouncilPhase @default(CONVOCATORIA)
+  location    String?
+  confirmedAt DateTime?
+  startsAt    DateTime?
+  endsAt      DateTime?
+  bitacoraOpensAt  DateTime?
+  bitacoraClosesAt DateTime?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  council     Council      @relation(fields: [councilId], references: [id], onDelete: Cascade)
+  slots       TimeSlot[]
+  availabilities Availability[]
+  proposals   DateProposal[]
+  selection   MeetingSelection?
+  reflections Reflection[]
+
+  @@index([councilId, phase])
+  @@map("meetings")
+}
+
+model TimeSlot {
+  id        String   @id @default(cuid())
+  meetingId String
+  startsAt  DateTime
+  endsAt    DateTime
+
+  meeting   Meeting  @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+  availabilities Availability[]
+  proposals DateProposal[]
+
+  @@index([meetingId])
+  @@map("time_slots")
+}
+
+model Availability {
+  id        String             @id @default(cuid())
+  meetingId String
+  slotId    String
+  userId    String
+  status    AvailabilityStatus @default(DISPONIBLE)
+  createdAt DateTime           @default(now())
+
+  meeting   Meeting            @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+  slot      TimeSlot           @relation(fields: [slotId], references: [id], onDelete: Cascade)
+  user      User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([slotId, userId])
+  @@map("availabilities")
+}
+
+enum AvailabilityStatus {
+  DISPONIBLE
+  TAL_VEZ
+  NO_DISPONIBLE
+}
+
+model DateProposal {
+  id           String   @id @default(cuid())
+  meetingId    String
+  slotId       String
+  attendeeCount Int
+  score        Float
+  rank         Int
+  confirmed    Boolean  @default(false)
+  createdAt    DateTime @default(now())
+
+  meeting      Meeting  @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+  slot         TimeSlot @relation(fields: [slotId], references: [id], onDelete: Cascade)
+
+  @@index([meetingId])
+  @@map("date_proposals")
+}
+
+// ─────────────────────────────────────────────
+// Dominio 2 — Banco del Consejo (Selección)
+// ─────────────────────────────────────────────
+
+enum TopicStatus {
+  ACTIVO
+  ARCHIVADO
+}
+
+model Topic {
+  id              String      @id @default(cuid())
+  councilId       String
+  title           String
+  description     String
+  category        String
+  status          TopicStatus @default(ACTIVO)
+  lastSelectedAt  DateTime?
+  timesUsed       Int         @default(0)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  council         Council     @relation(fields: [councilId], references: [id], onDelete: Cascade)
+  selections      MeetingSelection[]
+  knowledgeNode   KnowledgeNode?
+
+  @@index([councilId, status])
+  @@map("topics")
+}
+
+model Approach {
+  id        String   @id @default(cuid())
+  councilId String
+  name      String
+  createdAt DateTime @default(now())
+
+  council   Council  @relation(fields: [councilId], references: [id], onDelete: Cascade)
+  selections MeetingSelection[]
+
+  @@unique([councilId, name])
+  @@map("approaches")
+}
+
+model CouncilRules {
+  id                      String  @id @default(cuid())
+  councilId               String  @unique
+  noRepeatTopicMonths     Int     @default(6)
+  noConsecutiveCategory   Boolean @default(true)
+  candidateCount          Int     @default(3)
+  approachCount           Int     @default(3)
+  allowFreeCombination    Boolean @default(true)
+  excludeArchivedTopics   Boolean @default(true)
+
+  council                 Council @relation(fields: [councilId], references: [id], onDelete: Cascade)
+
+  @@map("council_rules")
+}
+
+model MeetingSelection {
+  id          String   @id @default(cuid())
+  meetingId   String   @unique
+  topicId     String
+  approachId  String?
+  optionalMaterial String?
+  selectedAt  DateTime @default(now())
+
+  meeting     Meeting  @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+  topic       Topic    @relation(fields: [topicId], references: [id])
+  approach    Approach? @relation(fields: [approachId], references: [id])
+
+  @@map("meeting_selections")
+}
+
+// ─────────────────────────────────────────────
+// Dominio 4 — Bitácora
+// ─────────────────────────────────────────────
+
+enum ReflectionVisibility {
+  PRIVADA
+  COMPARTIDA
+  ANONIMA
+}
+
+enum ReflectionKind {
+  REFLEXION
+  IDEA
+  PREGUNTA
+  PROXIMA_ACCION
+}
+
+model Reflection {
+  id          String                @id @default(cuid())
+  meetingId   String
+  userId      String
+  kind        ReflectionKind
+  body        String
+  visibility  ReflectionVisibility  @default(PRIVADA)
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
+
+  meeting     Meeting               @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+  user        User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  knowledgeNode KnowledgeNode?
+
+  @@index([meetingId, visibility])
+  @@map("reflections")
+}
+
+// ─────────────────────────────────────────────
+// Dominio 5 — Mapa del Conocimiento
+// ─────────────────────────────────────────────
+
+model KnowledgeNode {
+  id           String   @id @default(cuid())
+  councilId    String
+  label        String
+  category     String?
+  topicId      String?  @unique
+  reflectionId String?  @unique
+  positionX    Float    @default(0)
+  positionY    Float    @default(0)
+  positionZ    Float    @default(0)
+  meetingCount Int      @default(0)
+  reflectionCount Int   @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  council      Council  @relation(fields: [councilId], references: [id], onDelete: Cascade)
+  topic        Topic?   @relation(fields: [topicId], references: [id])
+  reflection   Reflection? @relation(fields: [reflectionId], references: [id])
+  edgesFrom    KnowledgeEdge[] @relation("EdgeFrom")
+  edgesTo      KnowledgeEdge[] @relation("EdgeTo")
+
+  @@index([councilId])
+  @@map("knowledge_nodes")
+}
+
+model KnowledgeEdge {
+  id        String   @id @default(cuid())
+  councilId String
+  fromId    String
+  toId      String
+  label     String?
+  weight    Float    @default(1)
+  createdAt DateTime @default(now())
+
+  council   Council  @relation(fields: [councilId], references: [id], onDelete: Cascade)
+  from      KnowledgeNode @relation("EdgeFrom", fields: [fromId], references: [id], onDelete: Cascade)
+  to        KnowledgeNode @relation("EdgeTo", fields: [toId], references: [id], onDelete: Cascade)
+
+  @@unique([fromId, toId])
+  @@index([councilId])
+  @@map("knowledge_edges")
+}

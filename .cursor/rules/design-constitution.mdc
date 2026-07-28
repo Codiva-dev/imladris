@@ -1,0 +1,27 @@
+---
+description: Design Constitution — reglas inviolables de El Consejo de Elrond
+alwaysApply: true
+---
+
+# Design Constitution
+
+Si una decisión contradice estas reglas, recházala.
+
+1. **Mobile-first siempre.** La experiencia primaria es el teléfono; escritorio es adaptación.
+2. **Una acción principal por pantalla.** Nunca más de un CTA dominante.
+3. **Máximo tres niveles de navegación.** El usuario nunca debe sentirse perdido.
+4. **El estado del Consejo gobierna la interfaz.** Muestra únicamente lo relevante para la fase actual.
+5. **Menos es más.** Si no reduce fricción ni enriquece el ritual, se elimina.
+6. **Las animaciones comunican estado.** Nunca ornamentales sin propósito. Respeta `prefers-reduced-motion`.
+7. **3D con propósito.** React Three Fiber solo donde aporta valor narrativo (mapa), no decoración permanente.
+8. **Accesibilidad por diseño.** Contrastes adecuados, áreas táctiles ≥44px, teclado en escritorio.
+9. **Rendimiento antes que espectacularidad.** 60 FPS en dispositivos modernos; carga inicial <3s en móvil razonable.
+10. **Persistencia del ritual.** Cada sesión deja huella en el mapa; con los años, la historia intelectual del Consejo.
+
+## Cinco dominios — nada más
+
+Coordinación · Selección (Temas / Enfoques / Reglas) · Reunión · Bitácora · Mapa del Conocimiento
+
+## Sensación
+
+No es software empresarial ni un dashboard. Debe sentirse como abrir un libro antiguo: la puerta a un lugar que cobra vida cuando el Consejo está por reunirse.

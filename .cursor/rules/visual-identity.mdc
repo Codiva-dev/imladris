@@ -1,0 +1,34 @@
+---
+description: Identidad visual — paleta, tipografía e iconografía de Imladris
+alwaysApply: true
+---
+
+# Identidad visual
+
+Inspiración (no réplica): manuscritos medievales, arquitectura élfica, latón envejecido, piedra, pergamino, madera oscura, luz cálida, neblina, bosques. Elegancia — no fantasía exagerada.
+
+## Paleta
+
+| Token | Hex | Uso |
+|-------|-----|-----|
+| Bosque profundo | `#20372E` | Fondos, superficies oscuras |
+| Verde Rivendel | `#4F7A63` | Acentos, estados activos |
+| Oro antiguo | `#C8A96B` | CTAs, detalles, énfasis |
+| Pergamino | `#EFE6D3` | Texto sobre oscuro, superficies claras |
+| Carbón | `#2A2A2A` | Texto denso, bordes |
+
+Variables CSS: `--forest`, `--rivendell`, `--gold`, `--parchment`, `--charcoal`.
+
+## Tipografía
+
+- Títulos: **Cinzel**
+- Subtítulos: **Cormorant Garamond**
+- Texto: **Inter**
+
+## Iconografía
+
+Nada de Material Icons. Iconos personalizados: hojas, runas, estrellas, ramas, brújulas, montañas, pergaminos.
+
+## Animaciones
+
+Acompañan, nunca distraen. Transiciones cinematográficas suaves al cambiar de fase. 60 fps. Nada brusco.

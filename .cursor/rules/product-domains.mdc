@@ -1,0 +1,30 @@
+---
+description: Arquitectura de dominios y máquina de estados del Consejo
+alwaysApply: true
+---
+
+# Dominios y estados
+
+## Estados (único estado activo)
+
+`CONVOCATORIA` → `DISPONIBILIDAD` → `QUORUM_ALCANZADO` → `FECHA_CONFIRMADA` → `TEMA_SELECCIONADO` → `CUENTA_REGRESIVA` → `EN_CURSO` → `BITACORA_ABIERTA` → `CERRADO`
+
+## Coordinación
+
+Quórum configurable (60–100%, default 80%). Motor de coincidencias presenta escenarios; el organizador confirma. Nunca agenda solo.
+
+## Selección
+
+Temas (título, descripción, categoría, estado, última selección, veces usado). Enfoques (pool sin historial). Reglas del Consejo (sin IA — solo reglas).
+
+## Reunión
+
+Tras confirmar, la app gira solo alrededor del próximo Consejo: fecha, lugar, countdown, participantes, tema, enfoque, material, mapa, confirmación.
+
+## Bitácora
+
+72h tras finalizar. Reflexión / Idea / Pregunta / Próxima acción. Privada / Compartida / Anónima. Las compartidas alimentan el mapa.
+
+## Mapa
+
+Fase 1: 2D. Fase 2: grafo. Fase 3: cielo nocturno 3D. Cada estrella es un tema; constelaciones = categorías.
