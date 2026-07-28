@@ -78,3 +78,29 @@ export function pickCandidates(
     })
     .slice(0, candidateCount);
 }
+
+export type ApproachOption = { id: string; name: string };
+
+/** Enfoques del pool: mezcla determinista por `seed` (p. ej. meetingId). */
+export function pickApproaches(
+  approaches: ApproachOption[],
+  count: number,
+  seed: string,
+): ApproachOption[] {
+  if (approaches.length <= count) return [...approaches];
+
+  const scored = approaches.map((a) => ({
+    ...a,
+    score: hashSeed(`${seed}:${a.id}`),
+  }));
+  scored.sort((a, b) => a.score - b.score || a.name.localeCompare(b.name));
+  return scored.slice(0, count).map(({ id, name }) => ({ id, name }));
+}
+
+function hashSeed(value: string): number {
+  let h = 0;
+  for (let i = 0; i < value.length; i++) {
+    h = (h * 31 + value.charCodeAt(i)) >>> 0;
+  }
+  return h;
+}

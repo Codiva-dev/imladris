@@ -1,2 +1,2 @@
-/** Dominio 3 — Reunión (UI y lógica de countdown / ritual). */
-export {};
+/** Dominio 3 — Reunión */
+export { advanceCouncilLifecycle, openBitacoraWindow } from "./advance";

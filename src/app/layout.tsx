@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Cinzel, Cormorant_Garamond, Inter } from "next/font/google";
 import { AppFrame } from "@/components/atmosphere/app-frame";
 import { Providers } from "@/components/providers";
+import { RegisterSW } from "@/components/pwa/register-sw";
 import "./globals.css";
 
 const cinzel = Cinzel({
@@ -65,6 +66,7 @@ export default function RootLayout({
     >
       <body className="font-body antialiased">
         <Providers>
+          <RegisterSW />
           <AppFrame>{children}</AppFrame>
         </Providers>
       </body>

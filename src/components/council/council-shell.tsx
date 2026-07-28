@@ -4,10 +4,12 @@ import { useEffect, useState } from "react";
 import { LandingGate } from "@/components/auth/landing-gate";
 import { TransitionSlot } from "@/components/atmosphere/transition-slot";
 import { AvailabilityScreen } from "@/components/council/availability-screen";
+import { BitacoraScreen } from "@/components/council/bitacora-screen";
 import { ConvocationScreen } from "@/components/council/convocation-screen";
-import { DateConfirmedScreen } from "@/components/council/date-confirmed-screen";
+import { MeetingScreen } from "@/components/council/meeting-screen";
 import { MemberHome } from "@/components/council/member-home";
 import { QuorumScreen } from "@/components/council/quorum-screen";
+import { TopicSelectionScreen } from "@/components/council/topic-selection-screen";
 import { authClient } from "@/lib/auth-client";
 import { useCouncilMe } from "@/hooks/use-council-me";
 
@@ -57,15 +59,16 @@ export function CouncilShell() {
   else if (forceAvailability && meeting) view = "availability";
   else if (phase === "DISPONIBILIDAD" && meeting) view = "availability";
   else if (phase === "QUORUM_ALCANZADO" && meeting) view = "quorum";
+  else if (phase === "FECHA_CONFIRMADA" && meeting) view = "selection";
   else if (
     meeting &&
-    (phase === "FECHA_CONFIRMADA" ||
-      phase === "TEMA_SELECCIONADO" ||
+    (phase === "TEMA_SELECCIONADO" ||
       phase === "CUENTA_REGRESIVA" ||
       phase === "EN_CURSO")
   ) {
-    view = "confirmed";
-  } else if (phase === "CERRADO") view = "home";
+    view = "meeting";
+  } else if (phase === "BITACORA_ABIERTA") view = "bitacora";
+  else if (phase === "CERRADO") view = "home";
   else view = "home";
 
   return (
@@ -94,9 +97,15 @@ export function CouncilShell() {
         />
       ) : null}
 
-      {view === "confirmed" && meeting ? (
-        <DateConfirmedScreen meeting={meeting} />
+      {view === "selection" && meeting ? (
+        <TopicSelectionScreen meeting={meeting} isOrganizer={isOrganizer} />
       ) : null}
+
+      {view === "meeting" && meeting ? (
+        <MeetingScreen meeting={meeting} isOrganizer={isOrganizer} />
+      ) : null}
+
+      {view === "bitacora" ? <BitacoraScreen embedded /> : null}
 
       {view === "home" ? (
         <MemberHome
@@ -108,7 +117,8 @@ export function CouncilShell() {
             setForceAvailability(false);
             void refetch();
           }}
-        /> ) : null}
+        />
+      ) : null}
     </TransitionSlot>
   );
 }

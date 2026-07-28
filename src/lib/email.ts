@@ -14,7 +14,7 @@ function getResend() {
 
 function fromAddress() {
   return (
-    process.env.RESEND_FROM_EMAIL ?? "Imladris <onboarding@resend.dev>"
+    process.env.RESEND_FROM_EMAIL ?? "Imladris <consejo@imladris.online>"
   );
 }
 

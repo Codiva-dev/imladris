@@ -39,7 +39,11 @@ Repositorio: [Bohemianmage/imladris](https://github.com/Bohemianmage/imladris)
 |----------|--------|
 | `DATABASE_URL` | Neon (Marketplace) |
 | `BETTER_AUTH_SECRET` | Secreto aleatorio (32+ bytes hex) |
-| `BETTER_AUTH_URL` | URL de producción, p. ej. `https://imladris-seven.vercel.app` |
+| `BETTER_AUTH_URL` | URL de producción, p. ej. `https://imladris.online` |
+| `RESEND_API_KEY` / `RESEND_FROM_EMAIL` | Resend — preferible `Imladris <consejo@imladris.online>` (dominio verificado) |
+| `NEXT_PUBLIC_VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` | Web Push (`npm run push:vapid`) |
+| `VAPID_SUBJECT` | `mailto:…` (opcional) |
+| `CRON_SECRET` | Secreto para `/api/cron/lifecycle` (además del header de Vercel Cron) |
 
 ## Arranque local (UI / ritual sin DB)
 
@@ -66,7 +70,8 @@ Las reglas inviolables viven en `.cursor/rules/`. Si una decisión las contradic
 - [x] Landing con login (sin convocatoria pública)
 - [x] Invitaciones por email (Resend)
 - [x] Coordinación: convocatoria → disponibilidad → quórum → confirmación
-- [ ] Selección (temas / enfoques)
-- [ ] Reunión dominante (countdown)
-- [ ] Bitácora / Mapa reales
-- [ ] PWA offline + Web Push
+- [x] Selección (temas / enfoques / reglas)
+- [x] Reunión dominante (countdown → en curso → bitácora)
+- [x] Bitácora real (72h) + Mapa 2D / grafo / cielo 3D
+- [x] PWA (service worker) + Web Push (opt-in)
+- [x] Asistencia, rotar enlace, cron de fases, remitente imladris.online

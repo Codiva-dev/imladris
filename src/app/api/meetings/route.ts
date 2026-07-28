@@ -8,6 +8,7 @@ import {
   requireSessionUser,
 } from "@/lib/council-access";
 import { sendConvocationEmail } from "@/lib/email";
+import { notifyCouncilMembers } from "@/lib/push";
 import { prisma } from "@/lib/prisma";
 
 type SlotBody = { startsAt: string };
@@ -87,6 +88,12 @@ export async function POST(request: Request) {
       }),
     ),
   );
+
+  await notifyCouncilMembers(membership.councilId, {
+    title: "Nueva convocatoria",
+    body: "El Consejo pide tu disponibilidad.",
+    url: "/",
+  });
 
   return NextResponse.json({
     id: meeting.id,

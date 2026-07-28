@@ -21,6 +21,8 @@ export type CouncilMe = {
     startsAt: string | null;
     endsAt: string | null;
     confirmedAt: string | null;
+    bitacoraOpensAt: string | null;
+    bitacoraClosesAt: string | null;
     slots: { id: string; startsAt: string; endsAt: string }[];
     proposals: {
       id: string;
@@ -34,6 +36,26 @@ export type CouncilMe = {
     }[];
     myAvailabilities: { slotId: string; status: string }[];
     responseCount: number;
+    attendance: {
+      mine: "VOY" | "TAL_VEZ" | "NO_VOY" | null;
+      counts: { VOY: number; TAL_VEZ: number; NO_VOY: number };
+      responses: {
+        userId: string;
+        name: string;
+        status: "VOY" | "TAL_VEZ" | "NO_VOY";
+      }[];
+    };
+    selection: {
+      topic: {
+        id: string;
+        title: string;
+        description: string;
+        category: string;
+      };
+      approach: { id: string; name: string } | null;
+      optionalMaterial: string | null;
+      selectedAt: string;
+    } | null;
   } | null;
 };
 

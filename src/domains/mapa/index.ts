@@ -1,2 +1,7 @@
-/** Dominio 5 — Mapa del Conocimiento (2D → grafo → cielo 3D). */
-export {};
+/** Dominio 5 — Mapa del Conocimiento */
+export {
+  ensureReflectionStar,
+  ensureTopicStar,
+  getMapSnapshot,
+  starPosition,
+} from "./stars";

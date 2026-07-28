@@ -51,6 +51,7 @@ export const MEETING_DOMINANT_PHASES: CouncilPhase[] = [
   "TEMA_SELECCIONADO",
   "CUENTA_REGRESIVA",
   "EN_CURSO",
+  "BITACORA_ABIERTA",
 ];
 
 export const BITACORA_WINDOW_HOURS = 72;

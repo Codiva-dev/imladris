@@ -35,14 +35,12 @@ export async function getMembershipForUser(userId: string) {
   });
 }
 
-/** Reunión activa = no cerrada / no bitácora finalizada. */
+/** Reunión activa = cualquier fase distinta de CERRADO (incluye bitácora abierta). */
 export async function getActiveMeeting(councilId: string) {
   return prisma.meeting.findFirst({
     where: {
       councilId,
-      phase: {
-        notIn: ["CERRADO", "BITACORA_ABIERTA"],
-      },
+      phase: { not: "CERRADO" },
     },
     include: {
       slots: { orderBy: { startsAt: "asc" } },
@@ -51,6 +49,24 @@ export async function getActiveMeeting(councilId: string) {
         include: { slot: true },
       },
       availabilities: true,
+      attendances: {
+        include: {
+          user: { select: { id: true, name: true } },
+        },
+      },
+      selection: {
+        include: {
+          topic: {
+            select: {
+              id: true,
+              title: true,
+              description: true,
+              category: true,
+            },
+          },
+          approach: { select: { id: true, name: true } },
+        },
+      },
     },
     orderBy: { createdAt: "desc" },
   });

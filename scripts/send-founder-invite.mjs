@@ -70,7 +70,7 @@ if (!key) {
 }
 
 const from =
-  process.env.RESEND_FROM_EMAIL ?? "Imladris <onboarding@resend.dev>";
+  process.env.RESEND_FROM_EMAIL ?? "Imladris <consejo@imladris.online>";
 
 const resend = new Resend(key);
 const { data, error } = await resend.emails.send({

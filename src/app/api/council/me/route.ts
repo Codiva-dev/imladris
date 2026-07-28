@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { advanceCouncilLifecycle } from "@/domains/reunion";
 import {
   appOrigin,
   getActiveMeeting,
@@ -20,6 +21,8 @@ export async function GET() {
     return NextResponse.json({ error: "Sin Consejo" }, { status: 404 });
   }
 
+  await advanceCouncilLifecycle(membership.councilId);
+
   let joinToken = membership.council.joinToken;
   if (!joinToken) {
     const updated = await prisma.council.update({
@@ -29,6 +32,10 @@ export async function GET() {
     });
     joinToken = updated.joinToken;
   }
+
+  const council = await prisma.council.findUniqueOrThrow({
+    where: { id: membership.councilId },
+  });
 
   const meeting = await getActiveMeeting(membership.councilId);
   const memberCount = await prisma.councilMember.count({
@@ -49,10 +56,10 @@ export async function GET() {
     user: { id: user.id, name: user.name, email: user.email },
     role: membership.role,
     council: {
-      id: membership.council.id,
-      name: membership.council.name,
-      phase: membership.council.phase,
-      quorum: quorumPercent(membership.council.quorumThreshold),
+      id: council.id,
+      name: council.name,
+      phase: council.phase,
+      quorum: quorumPercent(council.quorumThreshold),
       memberCount,
       joinUrl: isOrganizer ? joinUrl(appOrigin(), joinToken) : null,
     },
@@ -64,6 +71,8 @@ export async function GET() {
           startsAt: meeting.startsAt,
           endsAt: meeting.endsAt,
           confirmedAt: meeting.confirmedAt,
+          bitacoraOpensAt: meeting.bitacoraOpensAt,
+          bitacoraClosesAt: meeting.bitacoraClosesAt,
           slots: meeting.slots.map((s) => ({
             id: s.id,
             startsAt: s.startsAt,
@@ -81,6 +90,31 @@ export async function GET() {
           })),
           myAvailabilities,
           responseCount: respondents.size,
+          attendance: {
+            mine:
+              meeting.attendances.find((a) => a.userId === user.id)?.status ??
+              null,
+            counts: {
+              VOY: meeting.attendances.filter((a) => a.status === "VOY").length,
+              TAL_VEZ: meeting.attendances.filter((a) => a.status === "TAL_VEZ")
+                .length,
+              NO_VOY: meeting.attendances.filter((a) => a.status === "NO_VOY")
+                .length,
+            },
+            responses: meeting.attendances.map((a) => ({
+              userId: a.userId,
+              name: a.user.name,
+              status: a.status,
+            })),
+          },
+          selection: meeting.selection
+            ? {
+                topic: meeting.selection.topic,
+                approach: meeting.selection.approach,
+                optionalMaterial: meeting.selection.optionalMaterial,
+                selectedAt: meeting.selection.selectedAt,
+              }
+            : null,
         }
       : null,
   });
