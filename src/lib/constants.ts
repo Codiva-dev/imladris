@@ -17,20 +17,26 @@ export const QUORUM_OPTIONS = [60, 70, 75, 80, 85, 90, 100] as const;
 export type QuorumPercent = (typeof QUORUM_OPTIONS)[number];
 export const DEFAULT_QUORUM: QuorumPercent = 80;
 
+/** Lentes del Consejo al fundar (pool sin historial; el organizador puede ampliar). */
 export const DEFAULT_APPROACHES = [
-  "Ética",
-  "Historia",
-  "Estrategia",
-  "Economía",
   "Arte",
-  "Religión",
-  "Naturaleza",
-  "Psicología",
-  "Tecnología",
-  "Experiencia personal",
-  "Política",
   "Ciencia",
+  "Cultura",
+  "Derecho",
+  "Economía",
+  "Ética",
+  "Estrategia",
+  "Experiencia personal",
+  "Filosofía",
+  "Futuro",
+  "Historia",
   "Ingeniería",
+  "Mito y narrativa",
+  "Naturaleza",
+  "Política",
+  "Psicología",
+  "Religión",
+  "Tecnología",
 ] as const;
 
 export const PHASE_LABELS: Record<CouncilPhase, string> = {

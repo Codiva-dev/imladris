@@ -2,6 +2,7 @@ import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { APIError } from "better-auth/api";
 import { nextCookies } from "better-auth/next-js";
+import { DEFAULT_APPROACHES } from "@/lib/constants";
 import { log } from "@/lib/log";
 import { prisma } from "@/lib/prisma";
 import { normalizeUsername, validateUsername } from "@/lib/username";
@@ -139,13 +140,7 @@ export const auth = betterAuth({
                 },
                 rules: { create: {} },
                 approaches: {
-                  create: [
-                    { name: "Ética" },
-                    { name: "Historia" },
-                    { name: "Estrategia" },
-                    { name: "Experiencia personal" },
-                    { name: "Ciencia" },
-                  ],
+                  create: DEFAULT_APPROACHES.map((name) => ({ name })),
                 },
               },
             });
