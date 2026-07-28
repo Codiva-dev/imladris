@@ -150,6 +150,11 @@ export function MemberHome({
             Espacios
           </p>
           <div className="grid grid-cols-1 gap-3">
+            <Link href="/perfil">
+              <Button variant="ghost" className="w-full">
+                Perfil
+              </Button>
+            </Link>
             <Link href="/bitacora">
               <Button variant="ghost" className="w-full">
                 Bitácora

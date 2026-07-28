@@ -3,6 +3,7 @@ import { prismaAdapter } from "better-auth/adapters/prisma";
 import { APIError } from "better-auth/api";
 import { nextCookies } from "better-auth/next-js";
 import { prisma } from "@/lib/prisma";
+import { normalizeUsername, validateUsername } from "@/lib/username";
 
 /**
  * Acceso solo por invitación (o primer usuario bootstrap).
@@ -18,6 +19,16 @@ export const auth = betterAuth({
     enabled: true,
     minPasswordLength: 8,
   },
+  user: {
+    additionalFields: {
+      username: {
+        type: "string",
+        required: false,
+        unique: true,
+        input: true,
+      },
+    },
+  },
   databaseHooks: {
     user: {
       create: {
@@ -25,8 +36,30 @@ export const auth = betterAuth({
           const email = user.email.toLowerCase();
           const existingUsers = await prisma.user.count();
 
+          const rawUsername =
+            typeof (user as Record<string, unknown>).username === "string"
+              ? ((user as Record<string, unknown>).username as string)
+              : "";
+          const username = normalizeUsername(rawUsername);
+          const usernameError = validateUsername(username);
+          if (usernameError) {
+            throw new APIError("BAD_REQUEST", { message: usernameError });
+          }
+
+          const taken = await prisma.user.findFirst({
+            where: {
+              username: { equals: username, mode: "insensitive" },
+            },
+            select: { id: true },
+          });
+          if (taken) {
+            throw new APIError("BAD_REQUEST", {
+              message: "Ese handle ya está tomado.",
+            });
+          }
+
           if (existingUsers === 0) {
-            return { data: { ...user, email } };
+            return { data: { ...user, email, username } };
           }
 
           const invitation = await prisma.invitation.findFirst({
@@ -43,7 +76,7 @@ export const auth = betterAuth({
             });
           }
 
-          return { data: { ...user, email } };
+          return { data: { ...user, email, username } };
         },
         after: async (user) => {
           const email = user.email.toLowerCase();
@@ -80,6 +113,18 @@ export const auth = betterAuth({
               },
             });
             void council;
+
+            // Handle canónico del fundador si aún no vino en el signup
+            const current = await prisma.user.findUnique({
+              where: { id: user.id },
+              select: { username: true },
+            });
+            if (!current?.username) {
+              await prisma.user.update({
+                where: { id: user.id },
+                data: { username: "Bohemianmage" },
+              });
+            }
             return;
           }
 

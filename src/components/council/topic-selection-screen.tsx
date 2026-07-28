@@ -8,6 +8,7 @@ import { Reveal } from "@/components/council/phase-transition";
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
 import { useInvalidateCouncil, type CouncilMe } from "@/hooks/use-council-me";
+import { publicLabel } from "@/lib/username";
 import { cn } from "@/lib/utils";
 
 type Candidate = {
@@ -16,6 +17,8 @@ type Candidate = {
   description: string;
   category: string;
   timesUsed: number;
+  fromProposal?: boolean;
+  proposedBy?: { id: string; name: string; username?: string | null } | null;
 };
 
 type Approach = { id: string; name: string };
@@ -236,6 +239,8 @@ export function TopicSelectionScreen({ meeting, isOrganizer }: Props) {
                     </p>
                     <p className="font-body text-parchment/45 text-sm mt-1">
                       {c.category}
+                      {c.proposedBy ? ` · ${publicLabel(c.proposedBy)}` : ""}
+                      {c.fromProposal ? " · de esta convocatoria" : ""}
                       {c.timesUsed > 0 ? ` · ${c.timesUsed}×` : ""}
                     </p>
                     <p className="font-body text-parchment/55 text-sm mt-2 line-clamp-3">

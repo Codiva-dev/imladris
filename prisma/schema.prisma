@@ -20,6 +20,8 @@ model User {
   email         String    @unique
   emailVerified Boolean   @default(false)
   image         String?
+  /// Handle único sin @ (p. ej. Bohemianmage → @Bohemianmage).
+  username      String?   @unique
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -31,6 +33,8 @@ model User {
   invitationsSent  Invitation[] @relation("InvitationsSent")
   pushSubscriptions PushSubscription[]
   attendances      MeetingAttendance[]
+  topicProposals   TopicProposal[]
+  topicsProposed   Topic[]            @relation("TopicsProposedBy")
 
   @@map("users")
 }
@@ -214,6 +218,7 @@ model Meeting {
   selection   MeetingSelection?
   reflections Reflection[]
   attendances MeetingAttendance[]
+  topicProposals TopicProposal[]
 
   @@index([councilId, phase])
   @@map("meetings")
@@ -313,14 +318,19 @@ model Topic {
   status          TopicStatus @default(ACTIVO)
   lastSelectedAt  DateTime?
   timesUsed       Int         @default(0)
+  /// Quién propuso o añadió el tema al banco.
+  proposedById    String?
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
 
   council         Council     @relation(fields: [councilId], references: [id], onDelete: Cascade)
+  proposedBy      User?       @relation("TopicsProposedBy", fields: [proposedById], references: [id], onDelete: SetNull)
   selections      MeetingSelection[]
+  proposals       TopicProposal[]
   knowledgeNode   KnowledgeNode?
 
   @@index([councilId, status])
+  @@index([proposedById])
   @@map("topics")
 }
 
@@ -346,10 +356,29 @@ model CouncilRules {
   approachCount           Int     @default(3)
   allowFreeCombination    Boolean @default(true)
   excludeArchivedTopics   Boolean @default(true)
+  /// Máximo de temas que cada miembro puede proponer por convocatoria (1–2 típico).
+  topicProposalsPerMember Int     @default(2)
 
   council                 Council @relation(fields: [councilId], references: [id], onDelete: Cascade)
 
   @@map("council_rules")
+}
+
+/// Propuesta de tema de un miembro durante la convocatoria → entra al banco.
+model TopicProposal {
+  id        String   @id @default(cuid())
+  meetingId String
+  userId    String
+  topicId   String
+  createdAt DateTime @default(now())
+
+  meeting   Meeting  @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  topic     Topic    @relation(fields: [topicId], references: [id], onDelete: Cascade)
+
+  @@unique([meetingId, topicId])
+  @@index([meetingId, userId])
+  @@map("topic_proposals")
 }
 
 model MeetingSelection {

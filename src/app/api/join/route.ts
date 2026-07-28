@@ -5,23 +5,31 @@ import {
   createInvitation,
   getCouncilByJoinToken,
 } from "@/lib/invitations";
+import { normalizeUsername, validateUsername } from "@/lib/username";
 
 /** Registro vía enlace compartible del Consejo. */
 export async function POST(request: Request) {
   const body = (await request.json()) as {
     token?: string;
     name?: string;
+    username?: string;
     email?: string;
     password?: string;
   };
 
   const token = body.token?.trim();
   const name = body.name?.trim();
+  const username = normalizeUsername(body.username ?? "");
   const email = body.email?.trim().toLowerCase();
   const password = body.password;
 
   if (!token || !name || !email || !password || password.length < 8) {
     return NextResponse.json({ error: "Datos incompletos" }, { status: 400 });
+  }
+
+  const usernameError = validateUsername(username);
+  if (usernameError) {
+    return NextResponse.json({ error: usernameError }, { status: 400 });
   }
 
   const council = await getCouncilByJoinToken(token);
@@ -52,7 +60,7 @@ export async function POST(request: Request) {
 
   try {
     await auth.api.signUpEmail({
-      body: { name, email, password },
+      body: { name, email, password, username },
     });
   } catch (error) {
     const message =

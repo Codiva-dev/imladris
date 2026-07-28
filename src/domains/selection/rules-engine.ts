@@ -18,6 +18,7 @@ export type SelectionRules = {
   approachCount: number;
   allowFreeCombination: boolean;
   excludeArchivedTopics: boolean;
+  topicProposalsPerMember: number;
 };
 
 export const DEFAULT_RULES: SelectionRules = {
@@ -27,6 +28,7 @@ export const DEFAULT_RULES: SelectionRules = {
   approachCount: 3,
   allowFreeCombination: true,
   excludeArchivedTopics: true,
+  topicProposalsPerMember: 2,
 };
 
 function monthsAgo(months: number, from = new Date()): Date {

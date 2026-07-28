@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
+import { normalizeUsername } from "@/lib/username";
 
 type Props = {
   token: string;
@@ -12,6 +13,7 @@ type Props = {
 export function JoinCouncilForm({ token }: Props) {
   const router = useRouter();
   const [name, setName] = useState("");
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -26,12 +28,17 @@ export function JoinCouncilForm({ token }: Props) {
       const res = await fetch("/api/join", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token, name, email, password }),
+        body: JSON.stringify({
+          token,
+          name,
+          username: normalizeUsername(username),
+          email,
+          password,
+        }),
       });
       const data = (await res.json()) as { error?: string };
       if (!res.ok) throw new Error(data.error ?? "No se pudo unir");
 
-      // Inicia sesión con la cuenta recién creada
       const { authClient } = await import("@/lib/auth-client");
       const { error: signInError } = await authClient.signIn.email({
         email: email.trim().toLowerCase(),
@@ -57,6 +64,17 @@ export function JoinCouncilForm({ token }: Props) {
         onChange={(e) => setName(e.target.value)}
         autoComplete="name"
       />
+      <Field
+        label="Handle"
+        required
+        value={username}
+        onChange={(e) => setUsername(e.target.value.replace(/^@+/, ""))}
+        autoComplete="username"
+        placeholder="tu_handle"
+      />
+      <p className="font-body text-parchment/40 text-xs text-left -mt-2">
+        Se mostrará como @{normalizeUsername(username) || "…"}
+      </p>
       <Field
         label="Correo"
         type="email"

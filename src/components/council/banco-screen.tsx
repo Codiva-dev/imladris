@@ -6,6 +6,7 @@ import { Reveal } from "@/components/council/phase-transition";
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
 import { useCouncilMe } from "@/hooks/use-council-me";
+import { publicLabel } from "@/lib/username";
 import { cn } from "@/lib/utils";
 
 type Topic = {
@@ -15,6 +16,7 @@ type Topic = {
   category: string;
   status: "ACTIVO" | "ARCHIVADO";
   timesUsed: number;
+  proposedBy: { id: string; name: string; username: string | null } | null;
 };
 
 type Approach = { id: string; name: string };
@@ -26,6 +28,7 @@ type Rules = {
   approachCount: number;
   allowFreeCombination: boolean;
   excludeArchivedTopics: boolean;
+  topicProposalsPerMember: number;
 };
 
 export function BancoScreen() {
@@ -252,6 +255,7 @@ export function BancoScreen() {
                 <p className="font-subtitle text-parchment text-lg">{t.title}</p>
                 <p className="font-body text-parchment/40 text-sm mt-1">
                   {t.category}
+                  {t.proposedBy ? ` · ${publicLabel(t.proposedBy)}` : ""}
                   {t.timesUsed > 0 ? ` · ${t.timesUsed}×` : ""}
                   {t.status === "ARCHIVADO" ? " · archivado" : ""}
                 </p>
@@ -340,6 +344,19 @@ export function BancoScreen() {
                 setRules({
                   ...rules,
                   approachCount: Number(e.target.value),
+                })
+              }
+            />
+            <Field
+              label="Propuestas de tema por miembro"
+              type="number"
+              min={1}
+              max={2}
+              value={rules.topicProposalsPerMember}
+              onChange={(e) =>
+                setRules({
+                  ...rules,
+                  topicProposalsPerMember: Number(e.target.value),
                 })
               }
             />

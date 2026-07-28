@@ -28,6 +28,7 @@ export async function GET() {
       status: true,
       timesUsed: true,
       lastSelectedAt: true,
+      proposedBy: { select: { id: true, name: true, username: true } },
     },
   });
 
@@ -78,6 +79,7 @@ export async function POST(request: Request) {
       title,
       description,
       category,
+      proposedById: user.id,
     },
     select: {
       id: true,
@@ -86,6 +88,7 @@ export async function POST(request: Request) {
       category: true,
       status: true,
       timesUsed: true,
+      proposedBy: { select: { id: true, name: true, username: true } },
     },
   });
 

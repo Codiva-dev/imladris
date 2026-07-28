@@ -33,6 +33,7 @@ export async function GET() {
       approachCount: row.approachCount,
       allowFreeCombination: row.allowFreeCombination,
       excludeArchivedTopics: row.excludeArchivedTopics,
+      topicProposalsPerMember: row.topicProposalsPerMember,
     },
     defaults: DEFAULT_RULES,
   });
@@ -56,6 +57,7 @@ export async function PATCH(request: Request) {
     approachCount: number;
     allowFreeCombination: boolean;
     excludeArchivedTopics: boolean;
+    topicProposalsPerMember: number;
   }>;
 
   const data: Record<string, number | boolean> = {};
@@ -67,6 +69,12 @@ export async function PATCH(request: Request) {
   }
   if (typeof body.approachCount === "number") {
     data.approachCount = Math.min(8, Math.max(1, body.approachCount));
+  }
+  if (typeof body.topicProposalsPerMember === "number") {
+    data.topicProposalsPerMember = Math.min(
+      2,
+      Math.max(1, body.topicProposalsPerMember),
+    );
   }
   if (typeof body.noConsecutiveCategory === "boolean") {
     data.noConsecutiveCategory = body.noConsecutiveCategory;
@@ -92,6 +100,7 @@ export async function PATCH(request: Request) {
       approachCount: row.approachCount,
       allowFreeCombination: row.allowFreeCombination,
       excludeArchivedTopics: row.excludeArchivedTopics,
+      topicProposalsPerMember: row.topicProposalsPerMember,
     },
   });
 }

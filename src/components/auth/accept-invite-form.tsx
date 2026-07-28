@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
 import { authClient } from "@/lib/auth-client";
+import { normalizeUsername } from "@/lib/username";
 
 type Props = {
   email: string;
@@ -13,6 +14,7 @@ type Props = {
 export function AcceptInviteForm({ email }: Props) {
   const router = useRouter();
   const [name, setName] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
@@ -26,6 +28,12 @@ export function AcceptInviteForm({ email }: Props) {
       email,
       password,
       name: name.trim(),
+      username: normalizeUsername(username),
+    } as {
+      email: string;
+      password: string;
+      name: string;
+      username: string;
     });
 
     setPending(false);
@@ -49,6 +57,17 @@ export function AcceptInviteForm({ email }: Props) {
         onChange={(e) => setName(e.target.value)}
         autoComplete="name"
       />
+      <Field
+        label="Handle"
+        required
+        value={username}
+        onChange={(e) => setUsername(e.target.value.replace(/^@+/, ""))}
+        autoComplete="username"
+        placeholder="tu_handle"
+      />
+      <p className="font-body text-parchment/40 text-xs text-left -mt-2">
+        Se mostrará como @{normalizeUsername(username) || "…"}
+      </p>
       <Field
         label="Contraseña"
         type="password"

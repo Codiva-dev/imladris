@@ -23,6 +23,7 @@ export async function loadSelectionRules(
     approachCount: row.approachCount,
     allowFreeCombination: row.allowFreeCombination,
     excludeArchivedTopics: row.excludeArchivedTopics,
+    topicProposalsPerMember: row.topicProposalsPerMember,
   };
 }
 
@@ -51,6 +52,7 @@ export async function buildMeetingCandidates(meetingId: string, councilId: strin
       status: true,
       lastSelectedAt: true,
       timesUsed: true,
+      proposedBy: { select: { id: true, name: true, username: true } },
     },
     orderBy: { title: "asc" },
   });
@@ -60,6 +62,12 @@ export async function buildMeetingCandidates(meetingId: string, councilId: strin
     select: { id: true, name: true },
     orderBy: { name: "asc" },
   });
+
+  const meetingProposals = await prisma.topicProposal.findMany({
+    where: { meetingId },
+    select: { topicId: true },
+  });
+  const proposedIds = new Set(meetingProposals.map((p) => p.topicId));
 
   const topicCandidates: TopicCandidate[] = topics.map((t) => ({
     id: t.id,
@@ -71,7 +79,16 @@ export async function buildMeetingCandidates(meetingId: string, councilId: strin
   }));
 
   const eligible = filterTopicCandidates(topicCandidates, rules, lastCategory);
-  const candidates = pickCandidates(eligible, rules.candidateCount);
+
+  // Priorizar temas propuestos en esta convocatoria, luego el resto del banco.
+  const fromMeeting = eligible.filter((t) => proposedIds.has(t.id));
+  const fromBank = eligible.filter((t) => !proposedIds.has(t.id));
+  const meetingPicks = pickCandidates(fromMeeting, rules.candidateCount);
+  const bankPicks = pickCandidates(
+    fromBank,
+    Math.max(0, rules.candidateCount - meetingPicks.length),
+  );
+  const prioritized = [...meetingPicks, ...bankPicks];
 
   const approachPool: ApproachOption[] = approaches;
   const approachOptions = rules.allowFreeCombination
@@ -83,10 +100,12 @@ export async function buildMeetingCandidates(meetingId: string, councilId: strin
       candidateCount: rules.candidateCount,
       approachCount: rules.approachCount,
       allowFreeCombination: rules.allowFreeCombination,
+      topicProposalsPerMember: rules.topicProposalsPerMember,
     },
     topicCount: topics.length,
     eligibleCount: eligible.length,
-    candidates: candidates.map((c) => {
+    proposedInMeeting: fromMeeting.length,
+    candidates: prioritized.map((c) => {
       const full = topics.find((t) => t.id === c.id)!;
       return {
         id: full.id,
@@ -94,6 +113,8 @@ export async function buildMeetingCandidates(meetingId: string, councilId: strin
         description: full.description,
         category: full.category,
         timesUsed: full.timesUsed,
+        fromProposal: proposedIds.has(full.id),
+        proposedBy: full.proposedBy,
       };
     }),
     approaches: approachOptions,

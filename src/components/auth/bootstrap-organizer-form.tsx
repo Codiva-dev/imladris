@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
 import { authClient } from "@/lib/auth-client";
+import { normalizeUsername } from "@/lib/username";
 
 type Props = {
   initialEmail?: string;
@@ -11,6 +12,7 @@ type Props = {
 
 export function BootstrapOrganizerForm({ initialEmail = "" }: Props) {
   const [name, setName] = useState("");
+  const [username, setUsername] = useState("Bohemianmage");
   const [email, setEmail] = useState(initialEmail);
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -25,6 +27,12 @@ export function BootstrapOrganizerForm({ initialEmail = "" }: Props) {
       email: email.trim().toLowerCase(),
       password,
       name: name.trim(),
+      username: normalizeUsername(username),
+    } as {
+      email: string;
+      password: string;
+      name: string;
+      username: string;
     });
 
     setPending(false);
@@ -49,6 +57,17 @@ export function BootstrapOrganizerForm({ initialEmail = "" }: Props) {
         onChange={(e) => setName(e.target.value)}
         autoComplete="name"
       />
+      <Field
+        label="Handle"
+        required
+        value={username}
+        onChange={(e) => setUsername(e.target.value.replace(/^@+/, ""))}
+        autoComplete="username"
+        placeholder="Bohemianmage"
+      />
+      <p className="font-body text-parchment/40 text-xs text-left -mt-2">
+        Se mostrará como @{normalizeUsername(username) || "…"}
+      </p>
       <Field
         label="Correo"
         type="email"
