@@ -108,6 +108,8 @@ model Council {
   name            String           @default("El Consejo de Elrond")
   quorumThreshold QuorumThreshold  @default(P80)
   phase           CouncilPhase     @default(CERRADO)
+  /// Enlace permanente para que nuevos miembros se unan.
+  joinToken       String           @unique @default(cuid())
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
 

@@ -10,7 +10,8 @@
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio",
-    "icons:generate": "node scripts/generate-icons.mjs"
+    "icons:generate": "node scripts/generate-icons.mjs",
+    "email:founder": "node --env-file=.env.local scripts/send-founder-invite.mjs"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",
@@ -26,6 +27,7 @@
     "next": "15.5.22",
     "react": "19.1.0",
     "react-dom": "19.1.0",
+    "resend": "^6.18.1",
     "tailwind-merge": "^3.6.0",
     "three": "^0.185.1",
     "zustand": "^5.0.14"

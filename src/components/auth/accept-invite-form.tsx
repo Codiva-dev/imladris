@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Field } from "@/components/ui/field";
 import { authClient } from "@/lib/auth-client";
 
 type Props = {
@@ -39,43 +40,24 @@ export function AcceptInviteForm({ email }: Props) {
   }
 
   return (
-    <form onSubmit={onSubmit} className="flex flex-col gap-4 text-left">
-      <label className="flex flex-col gap-1.5">
-        <span className="font-subtitle text-parchment/70 text-sm">Correo</span>
-        <input
-          type="email"
-          value={email}
-          readOnly
-          className="min-h-11 rounded-sm border border-parchment/20 bg-forest/40 px-3 text-parchment/80 outline-none"
-        />
-      </label>
-
-      <label className="flex flex-col gap-1.5">
-        <span className="font-subtitle text-parchment/70 text-sm">Nombre</span>
-        <input
-          type="text"
-          required
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          autoComplete="name"
-          className="min-h-11 rounded-sm border border-parchment/20 bg-forest/60 px-3 text-parchment outline-none focus:border-gold/50"
-        />
-      </label>
-
-      <label className="flex flex-col gap-1.5">
-        <span className="font-subtitle text-parchment/70 text-sm">
-          Contraseña
-        </span>
-        <input
-          type="password"
-          required
-          minLength={8}
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          autoComplete="new-password"
-          className="min-h-11 rounded-sm border border-parchment/20 bg-forest/60 px-3 text-parchment outline-none focus:border-gold/50"
-        />
-      </label>
+    <form onSubmit={onSubmit} className="flex flex-col gap-4">
+      <Field label="Correo" type="email" value={email} readOnly />
+      <Field
+        label="Nombre"
+        required
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        autoComplete="name"
+      />
+      <Field
+        label="Contraseña"
+        type="password"
+        required
+        minLength={8}
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        autoComplete="new-password"
+      />
 
       {error ? (
         <p className="font-body text-sm text-gold" role="alert">
@@ -84,7 +66,7 @@ export function AcceptInviteForm({ email }: Props) {
       ) : null}
 
       <Button type="submit" className="w-full mt-2" disabled={pending}>
-        {pending ? "Entrando…" : "Entrar al Consejo"}
+        {pending ? "Entrando…" : "Entrar"}
       </Button>
     </form>
   );

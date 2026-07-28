@@ -63,9 +63,10 @@ Las reglas inviolables viven en `.cursor/rules/`. Si una decisión las contradic
 - [x] Transición unificada (velo) entre fases y rutas
 - [x] Stubs `/bitacora` y `/mapa` (miembro)
 - [x] Iconos / logo Lucide (SVG + PNG + PWA)
-- [ ] Email de invitación (Resend — conectado; falta cablear en código)
-- [ ] Vars Better Auth + deploy (`BETTER_AUTH_*`, dominio imladris.online)
-- [ ] API Route Handlers por dominio
-- [ ] UI completa de cada fase
+- [x] Landing con login (sin convocatoria pública)
+- [x] Invitaciones por email (Resend)
+- [x] Coordinación: convocatoria → disponibilidad → quórum → confirmación
+- [ ] Selección (temas / enfoques)
+- [ ] Reunión dominante (countdown)
+- [ ] Bitácora / Mapa reales
 - [ ] PWA offline + Web Push
-- [ ] Mapa 2D → grafo → cielo 3D

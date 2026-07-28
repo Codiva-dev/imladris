@@ -75,3 +75,24 @@ export function invitationIsAcceptable(
 export function inviteUrl(origin: string, token: string) {
   return `${origin}/invitar/${token}`;
 }
+
+export function joinUrl(origin: string, joinToken: string) {
+  return `${origin}/unirse/${joinToken}`;
+}
+
+export async function getCouncilByJoinToken(joinToken: string) {
+  return prisma.council.findUnique({
+    where: { joinToken },
+    select: {
+      id: true,
+      name: true,
+      joinToken: true,
+      members: {
+        where: { role: "ORGANIZADOR" },
+        take: 1,
+        select: { userId: true },
+      },
+    },
+  });
+}
+

@@ -2,16 +2,11 @@
 
 import { motion, useReducedMotion } from "framer-motion";
 import { Logo } from "@/components/brand/logo";
+import { SignInForm } from "@/components/auth/sign-in-form";
 import { Reveal } from "@/components/council/phase-transition";
-import { Button } from "@/components/ui/button";
-import { useCouncilStore } from "@/stores/council-store";
 
-/**
- * Umbral de entrada — cuando no hay Consejo en cuenta regresiva / en curso.
- * Una composición, un CTA. Bitácora y mapa viven en el espacio del miembro.
- */
-export function ClosedPortal() {
-  const setPhase = useCouncilStore((s) => s.setPhase);
+/** Landing pública: marca + iniciar sesión. Sin convocatoria. */
+export function LandingGate() {
   const reduce = useReducedMotion();
 
   return (
@@ -31,26 +26,14 @@ export function ClosedPortal() {
         </motion.div>
       </Reveal>
 
-      <Reveal delay={0.32}>
+      <Reveal delay={0.28}>
         <h1 className="font-display text-parchment text-4xl sm:text-5xl leading-[1.15] max-w-[12ch] text-balance">
           El Consejo de Elrond
         </h1>
       </Reveal>
 
-      <Reveal delay={0.48}>
-        <p className="font-subtitle text-parchment/70 text-lg sm:text-xl mt-6 max-w-[26ch] leading-relaxed italic">
-          Un lugar que solo cobra vida cuando el Consejo está por reunirse.
-        </p>
-      </Reveal>
-
-      <Reveal delay={0.68} className="mt-14 w-full max-w-xs">
-        <Button
-          className="w-full shadow-[0_0_32px_rgba(200,169,107,0.22)]"
-          onClick={() => setPhase("CONVOCATORIA")}
-          aria-label="Abrir una nueva convocatoria"
-        >
-          Nueva convocatoria
-        </Button>
+      <Reveal delay={0.45} className="w-full flex justify-center">
+        <SignInForm />
       </Reveal>
     </div>
   );

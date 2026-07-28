@@ -1,55 +1,114 @@
 "use client";
 
-import { ClosedPortal } from "@/components/council/closed-portal";
-import { ConvocationScreen } from "@/components/council/convocation-screen";
-import { PhaseTransition } from "@/components/council/phase-transition";
+import { useEffect, useState } from "react";
+import { LandingGate } from "@/components/auth/landing-gate";
 import { TransitionSlot } from "@/components/atmosphere/transition-slot";
-import { Button } from "@/components/ui/button";
-import { PHASE_LABELS, type CouncilPhase } from "@/lib/constants";
-import { useCouncilStore } from "@/stores/council-store";
+import { AvailabilityScreen } from "@/components/council/availability-screen";
+import { ConvocationScreen } from "@/components/council/convocation-screen";
+import { DateConfirmedScreen } from "@/components/council/date-confirmed-screen";
+import { MemberHome } from "@/components/council/member-home";
+import { QuorumScreen } from "@/components/council/quorum-screen";
+import { authClient } from "@/lib/auth-client";
+import { useCouncilMe } from "@/hooks/use-council-me";
 
-/**
- * Shell gobernado por el estado del Consejo.
- * Una fase activa → una interfaz, con el mismo velo que las rutas.
- */
 export function CouncilShell() {
-  const phase = useCouncilStore((s) => s.phase);
+  const { data: session, isPending: sessionPending } = authClient.useSession();
+  const { data, isPending, isError, refetch } = useCouncilMe(Boolean(session));
+  const [drafting, setDrafting] = useState(false);
+  const [forceAvailability, setForceAvailability] = useState(false);
+
+  useEffect(() => {
+    if (!session) return;
+    void refetch();
+  }, [session, refetch]);
+
+  if (sessionPending || (session && isPending && !data)) {
+    return <div className="min-h-dvh" aria-busy="true" aria-label="Cargando" />;
+  }
+
+  if (!session) {
+    return (
+      <TransitionSlot transitionKey="landing" skipInitial>
+        <LandingGate />
+      </TransitionSlot>
+    );
+  }
+
+  if (isError || !data) {
+    return (
+      <div className="relative z-10 flex min-h-dvh items-center justify-center px-6">
+        <button
+          type="button"
+          className="font-subtitle text-gold min-h-11"
+          onClick={() => void refetch()}
+        >
+          Reintentar
+        </button>
+      </div>
+    );
+  }
+
+  const phase = data.council.phase;
+  const isOrganizer = data.role === "ORGANIZADOR";
+  const meeting = data.meeting;
+
+  let view = "home";
+  if (drafting) view = "convocation";
+  else if (forceAvailability && meeting) view = "availability";
+  else if (phase === "DISPONIBILIDAD" && meeting) view = "availability";
+  else if (phase === "QUORUM_ALCANZADO" && meeting) view = "quorum";
+  else if (
+    meeting &&
+    (phase === "FECHA_CONFIRMADA" ||
+      phase === "TEMA_SELECCIONADO" ||
+      phase === "CUENTA_REGRESIVA" ||
+      phase === "EN_CURSO")
+  ) {
+    view = "confirmed";
+  } else if (phase === "CERRADO") view = "home";
+  else view = "home";
 
   return (
-    <TransitionSlot transitionKey={phase} skipInitial>
-      {phase === "CERRADO" ? (
-        <ClosedPortal />
-      ) : phase === "CONVOCATORIA" ? (
-        <ConvocationScreen />
-      ) : (
-        <PhasePlaceholder phase={phase} />
-      )}
+    <TransitionSlot transitionKey={`${view}-${phase}`} skipInitial>
+      {view === "convocation" ? (
+        <ConvocationScreen
+          quorum={data.council.quorum}
+          onBack={() => setDrafting(false)}
+        />
+      ) : null}
+
+      {view === "availability" && meeting ? (
+        <AvailabilityScreen
+          meeting={meeting}
+          memberCount={data.council.memberCount}
+          responseCount={meeting.responseCount}
+          onSaved={() => setForceAvailability(false)}
+        />
+      ) : null}
+
+      {view === "quorum" && meeting ? (
+        <QuorumScreen
+          meeting={meeting}
+          isOrganizer={isOrganizer}
+          onEditAvailability={() => setForceAvailability(true)}
+        />
+      ) : null}
+
+      {view === "confirmed" && meeting ? (
+        <DateConfirmedScreen meeting={meeting} />
+      ) : null}
+
+      {view === "home" ? (
+        <MemberHome
+          isOrganizer={isOrganizer}
+          hasActiveMeeting={Boolean(meeting) && phase !== "CERRADO"}
+          joinUrl={data.council.joinUrl}
+          onStartConvocation={() => setDrafting(true)}
+          onOpenMeeting={() => {
+            setForceAvailability(false);
+            void refetch();
+          }}
+        /> ) : null}
     </TransitionSlot>
-  );
-}
-
-function PhasePlaceholder({ phase }: { phase: CouncilPhase }) {
-  const setPhase = useCouncilStore((s) => s.setPhase);
-
-  return (
-    <PhaseTransition className="relative z-10 flex min-h-dvh flex-col items-center justify-center px-6 text-center">
-      <p className="font-subtitle text-gold text-xl tracking-wide mb-3">
-        {PHASE_LABELS[phase]}
-      </p>
-      <h1 className="font-display text-parchment text-3xl max-w-[16ch] text-balance">
-        Esta fase se construirá a continuación
-      </h1>
-      <p className="font-subtitle text-parchment/55 text-lg mt-5 max-w-[28ch] leading-relaxed">
-        El esqueleto de dominios ya está listo. La UI completa llega dominio a
-        dominio.
-      </p>
-      <Button
-        className="mt-10"
-        variant="ghost"
-        onClick={() => setPhase("CERRADO")}
-      >
-        Volver al umbral
-      </Button>
-    </PhaseTransition>
   );
 }

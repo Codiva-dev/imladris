@@ -1,6 +1,7 @@
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
+import { sendInvitationEmail } from "@/lib/email";
 import { createInvitation, inviteUrl } from "@/lib/invitations";
 import { prisma } from "@/lib/prisma";
 import type { MemberRole } from "@prisma/client";
@@ -27,6 +28,9 @@ export async function POST(request: Request) {
       role: "ORGANIZADOR",
       ...(body.councilId ? { councilId: body.councilId } : {}),
     },
+    include: {
+      council: { select: { name: true } },
+    },
   });
 
   if (!membership) {
@@ -44,15 +48,22 @@ export async function POST(request: Request) {
       invitedById: session.user.id,
     });
 
-    const origin = new URL(request.url).origin;
-    const url = inviteUrl(origin, invitation.token);
+    const origin =
+      process.env.BETTER_AUTH_URL ?? new URL(request.url).origin;
+    const url = inviteUrl(origin.replace(/\/$/, ""), invitation.token);
 
-    // Email (Resend) llega después; por ahora devolvemos el enlace.
+    await sendInvitationEmail({
+      to: invitation.email,
+      inviterName: session.user.name,
+      councilName: membership.council.name,
+      inviteUrl: url,
+      role: invitation.role,
+    });
+
     return NextResponse.json({
       id: invitation.id,
       email: invitation.email,
       expiresAt: invitation.expiresAt,
-      url,
     });
   } catch (error) {
     const message =

@@ -1,17 +1,18 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
-import { authClient } from "@/lib/auth-client";
 
 type Props = {
-  initialEmail?: string;
+  token: string;
 };
 
-export function BootstrapOrganizerForm({ initialEmail = "" }: Props) {
+export function JoinCouncilForm({ token }: Props) {
+  const router = useRouter();
   const [name, setName] = useState("");
-  const [email, setEmail] = useState(initialEmail);
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
@@ -21,27 +22,34 @@ export function BootstrapOrganizerForm({ initialEmail = "" }: Props) {
     setError(null);
     setPending(true);
 
-    const { error: signUpError } = await authClient.signUp.email({
-      email: email.trim().toLowerCase(),
-      password,
-      name: name.trim(),
-    });
+    try {
+      const res = await fetch("/api/join", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token, name, email, password }),
+      });
+      const data = (await res.json()) as { error?: string };
+      if (!res.ok) throw new Error(data.error ?? "No se pudo unir");
 
-    setPending(false);
-
-    if (signUpError) {
-      setError(signUpError.message ?? "No se pudo abrir el Consejo.");
-      return;
+      // Inicia sesión con la cuenta recién creada
+      const { authClient } = await import("@/lib/auth-client");
+      const { error: signInError } = await authClient.signIn.email({
+        email: email.trim().toLowerCase(),
+        password,
+      });
+      if (signInError) {
+        router.replace("/");
+        return;
+      }
+      window.location.href = "/";
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error");
+      setPending(false);
     }
-
-    window.location.href = "/";
   }
 
   return (
-    <form
-      onSubmit={onSubmit}
-      className="mt-10 w-full max-w-sm flex flex-col gap-4"
-    >
+    <form onSubmit={onSubmit} className="flex flex-col gap-4">
       <Field
         label="Nombre"
         required
@@ -56,7 +64,6 @@ export function BootstrapOrganizerForm({ initialEmail = "" }: Props) {
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         autoComplete="email"
-        readOnly={Boolean(initialEmail)}
       />
       <Field
         label="Contraseña"
@@ -67,15 +74,13 @@ export function BootstrapOrganizerForm({ initialEmail = "" }: Props) {
         onChange={(e) => setPassword(e.target.value)}
         autoComplete="new-password"
       />
-
       {error ? (
         <p className="font-body text-sm text-gold" role="alert">
           {error}
         </p>
       ) : null}
-
-      <Button type="submit" className="w-full" disabled={pending}>
-        {pending ? "Abriendo…" : "Fundar el Consejo"}
+      <Button type="submit" className="w-full mt-2" disabled={pending}>
+        {pending ? "Entrando…" : "Unirme al Consejo"}
       </Button>
     </form>
   );

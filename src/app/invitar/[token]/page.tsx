@@ -21,15 +21,11 @@ export default async function InvitePage({ params }: Props) {
   return (
     <div className="relative z-10 flex min-h-dvh flex-col items-center justify-center px-6 py-16 text-center">
       <Logo size="md" withWordmark className="mb-5" />
-      <h1 className="font-display text-parchment text-3xl sm:text-4xl leading-tight max-w-[16ch]">
-        Has sido convocado
+      <h1 className="font-display text-parchment text-3xl sm:text-4xl">
+        {invitation.council.name}
       </h1>
-      <p className="font-subtitle text-parchment/65 text-lg mt-5 max-w-[32ch] leading-relaxed">
-        {invitation.invitedBy.name} te invita a{" "}
-        <span className="text-parchment not-italic">
-          {invitation.council.name}
-        </span>
-        .
+      <p className="font-subtitle text-parchment/60 text-lg mt-3">
+        {invitation.invitedBy.name}
       </p>
       <div className="mt-10 w-full max-w-sm">
         <AcceptInviteForm email={invitation.email} />
