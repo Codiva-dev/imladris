@@ -88,6 +88,7 @@ export async function getCouncilByJoinToken(joinToken: string) {
       name: true,
       phase: true,
       joinToken: true,
+      reglamento: true,
       members: {
         where: { role: "ORGANIZADOR" },
         take: 1,

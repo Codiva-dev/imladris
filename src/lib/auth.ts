@@ -2,6 +2,7 @@ import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { APIError } from "better-auth/api";
 import { nextCookies } from "better-auth/next-js";
+import { log } from "@/lib/log";
 import { prisma } from "@/lib/prisma";
 import { normalizeUsername, validateUsername } from "@/lib/username";
 
@@ -43,6 +44,11 @@ export const auth = betterAuth({
           const username = normalizeUsername(rawUsername);
           const usernameError = validateUsername(username);
           if (usernameError) {
+            log.warn("auth.signup", "Identificador inválido", {
+              email,
+              username,
+              reason: usernameError,
+            });
             throw new APIError("BAD_REQUEST", { message: usernameError });
           }
 
@@ -53,12 +59,17 @@ export const auth = betterAuth({
             select: { id: true },
           });
           if (taken) {
+            log.warn("auth.signup", "Identificador tomado", {
+              email,
+              username,
+            });
             throw new APIError("BAD_REQUEST", {
               message: "Ese identificador ya está tomado.",
             });
           }
 
           if (existingUsers === 0) {
+            log.info("auth.signup", "Bootstrap fundador", { email, username });
             return { data: { ...user, email, username } };
           }
 
@@ -71,6 +82,7 @@ export const auth = betterAuth({
           });
 
           if (!invitation) {
+            log.warn("auth.signup", "Sin invitación PENDING", { email });
             throw new APIError("FORBIDDEN", {
               message: "El Consejo solo abre su puerta por invitación.",
             });
@@ -84,12 +96,23 @@ export const auth = betterAuth({
             council?.phase === "CUENTA_REGRESIVA" ||
             council?.phase === "EN_CURSO"
           ) {
+            log.warn("auth.signup", "Consejo sellado en signup", {
+              email,
+              councilId: invitation.councilId,
+              phase: council.phase,
+            });
             throw new APIError("FORBIDDEN", {
               message:
                 "El Consejo está reunido. La puerta permanece cerrada hasta que termine.",
             });
           }
 
+          log.info("auth.signup", "Signup autorizado por invitación", {
+            email,
+            username,
+            councilId: invitation.councilId,
+            invitationId: invitation.id,
+          });
           return { data: { ...user, email, username } };
         },
         after: async (user) => {
@@ -126,7 +149,6 @@ export const auth = betterAuth({
                 },
               },
             });
-            void council;
 
             // Handle canónico del fundador si aún no vino en el signup
             const current = await prisma.user.findUnique({
@@ -139,6 +161,11 @@ export const auth = betterAuth({
                 data: { username: "Bohemianmage" },
               });
             }
+            log.info("auth.signup", "Consejo fundado", {
+              email,
+              userId: user.id,
+              councilId: council.id,
+            });
             return;
           }
 
@@ -158,6 +185,12 @@ export const auth = betterAuth({
               },
             }),
           ]);
+          log.info("auth.signup", "Miembro unido", {
+            email,
+            userId: user.id,
+            councilId: invitation.councilId,
+            role: invitation.role,
+          });
         },
       },
     },

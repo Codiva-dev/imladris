@@ -1,34 +1,67 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
+import { useToast } from "@/components/ui/toast";
 import { authClient } from "@/lib/auth-client";
-import { normalizeUsername } from "@/lib/username";
+import { reportClientError } from "@/lib/client-log";
+import { normalizeUsername, validateUsername } from "@/lib/username";
 
 type Props = {
   email: string;
 };
 
 export function AcceptInviteForm({ email }: Props) {
-  const router = useRouter();
+  const { error: toastError } = useToast();
   const [name, setName] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
 
+  function showError(
+    message: string,
+    fields?: Record<string, unknown>,
+  ) {
+    setError(message);
+    toastError(message);
+    reportClientError({
+      scope: "invite.form",
+      message,
+      fields: {
+        ...fields,
+        email,
+        username: normalizeUsername(username) || undefined,
+      },
+    });
+  }
+
   async function onSubmit(event: React.FormEvent) {
     event.preventDefault();
     setError(null);
+
+    const handle = normalizeUsername(username);
+    const usernameError = validateUsername(handle);
+    if (usernameError) {
+      showError(usernameError, { code: "USERNAME_INVALID" });
+      return;
+    }
+
+    if (password.length < 8) {
+      showError("La contraseña debe tener al menos 8 caracteres.", {
+        code: "PASSWORD_SHORT",
+      });
+      return;
+    }
+
     setPending(true);
 
     const { error: signUpError } = await authClient.signUp.email({
       email,
       password,
       name: name.trim(),
-      username: normalizeUsername(username),
+      username: handle,
     } as {
       email: string;
       password: string;
@@ -36,19 +69,20 @@ export function AcceptInviteForm({ email }: Props) {
       username: string;
     });
 
-    setPending(false);
-
     if (signUpError) {
-      setError(signUpError.message ?? "No se pudo aceptar la invitación.");
+      showError(signUpError.message ?? "No se pudo aceptar la invitación.", {
+        code: "SIGNUP_FAILED",
+        authMessage: signUpError.message,
+      });
+      setPending(false);
       return;
     }
 
-    router.replace("/");
-    router.refresh();
+    window.location.href = "/";
   }
 
   return (
-    <form onSubmit={onSubmit} className="flex flex-col gap-4">
+    <form onSubmit={onSubmit} className="flex flex-col gap-4" noValidate>
       <Field label="Correo" type="email" value={email} readOnly />
       <Field
         label="Nombre"
@@ -64,9 +98,11 @@ export function AcceptInviteForm({ email }: Props) {
         onChange={(e) => setUsername(e.target.value.replace(/^@+/, ""))}
         autoComplete="username"
         placeholder="tu_nombre"
+        title="3–24 caracteres: empieza con letra; luego letras, números o _"
       />
       <p className="font-body text-parchment/40 text-xs text-left -mt-2">
-        Se mostrará como @{normalizeUsername(username) || "…"}
+        Se mostrará como @{normalizeUsername(username) || "…"}. Solo letras,
+        números y _; empieza con letra.
       </p>
       <Field
         label="Contraseña"

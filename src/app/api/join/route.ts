@@ -1,43 +1,47 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
-import { appOrigin } from "@/lib/council-access";
 import {
   createInvitation,
   getCouncilByJoinToken,
 } from "@/lib/invitations";
-import { normalizeUsername, validateUsername } from "@/lib/username";
+import { log, maskSecret } from "@/lib/log";
+import { prisma } from "@/lib/prisma";
 
-/** Registro vía enlace compartible del Consejo. */
+/**
+ * Prepara una invitación PENDING vía enlace compartible.
+ * El cliente completa el registro con signUp (cookies de sesión correctas).
+ */
 export async function POST(request: Request) {
   const body = (await request.json()) as {
     token?: string;
-    name?: string;
-    username?: string;
     email?: string;
-    password?: string;
   };
 
   const token = body.token?.trim();
-  const name = body.name?.trim();
-  const username = normalizeUsername(body.username ?? "");
   const email = body.email?.trim().toLowerCase();
-  const password = body.password;
 
-  if (!token || !name || !email || !password || password.length < 8) {
+  if (!token || !email) {
+    log.warn("join", "Datos incompletos", {
+      hasToken: Boolean(token),
+      hasEmail: Boolean(email),
+    });
     return NextResponse.json({ error: "Datos incompletos" }, { status: 400 });
-  }
-
-  const usernameError = validateUsername(username);
-  if (usernameError) {
-    return NextResponse.json({ error: usernameError }, { status: 400 });
   }
 
   const council = await getCouncilByJoinToken(token);
   if (!council) {
+    log.warn("join", "Enlace no válido", {
+      token: maskSecret(token),
+      email,
+    });
     return NextResponse.json({ error: "Enlace no válido" }, { status: 404 });
   }
 
   if (council.phase === "CUENTA_REGRESIVA" || council.phase === "EN_CURSO") {
+    log.warn("join", "Consejo sellado", {
+      councilId: council.id,
+      phase: council.phase,
+      email,
+    });
     return NextResponse.json(
       {
         error:
@@ -50,9 +54,52 @@ export async function POST(request: Request) {
 
   const organizerId = council.members[0]?.userId;
   if (!organizerId) {
+    log.error("join", "Sin organizador", { councilId: council.id, email });
     return NextResponse.json(
       { error: "El Consejo no tiene organizador" },
       { status: 400 },
+    );
+  }
+
+  const existingUser = await prisma.user.findUnique({
+    where: { email },
+    select: {
+      id: true,
+      memberships: {
+        where: { councilId: council.id },
+        select: { id: true },
+        take: 1,
+      },
+    },
+  });
+
+  if (existingUser?.memberships.length) {
+    log.info("join", "Ya es miembro", {
+      councilId: council.id,
+      email,
+      code: "ALREADY_MEMBER",
+    });
+    return NextResponse.json(
+      {
+        error: "Ya formas parte del Consejo. Entra con tu correo y contraseña.",
+        code: "ALREADY_MEMBER",
+      },
+      { status: 409 },
+    );
+  }
+
+  if (existingUser) {
+    log.info("join", "Correo ya registrado", {
+      councilId: council.id,
+      email,
+      code: "EMAIL_TAKEN",
+    });
+    return NextResponse.json(
+      {
+        error: "Ese correo ya tiene cuenta. Entra desde el inicio.",
+        code: "EMAIL_TAKEN",
+      },
+      { status: 409 },
     );
   }
 
@@ -66,21 +113,17 @@ export async function POST(request: Request) {
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "No se pudo preparar la unión";
-    return NextResponse.json({ error: message }, { status: 400 });
-  }
-
-  try {
-    await auth.api.signUpEmail({
-      body: { name, email, password, username },
+    log.error("join", "Fallo al crear invitación", {
+      councilId: council.id,
+      email,
+      error,
     });
-  } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "No se pudo crear la cuenta";
     return NextResponse.json({ error: message }, { status: 400 });
   }
 
-  return NextResponse.json({
-    ok: true,
-    redirectTo: appOrigin(),
+  log.info("join", "Invitación preparada", {
+    councilId: council.id,
+    email,
   });
+  return NextResponse.json({ ok: true });
 }

@@ -1,7 +1,9 @@
 import { Logo } from "@/components/brand/logo";
 import { JoinCouncilForm } from "@/components/auth/join-council-form";
+import { ReglamentoPreview } from "@/components/auth/reglamento-preview";
 import { isRitualSealed, RITUAL_SEAL_MESSAGE } from "@/lib/constants";
 import { getCouncilByJoinToken } from "@/lib/invitations";
+import { resolveReglamento } from "@/lib/reglamento";
 import { notFound } from "next/navigation";
 
 type Props = {
@@ -30,6 +32,8 @@ export default async function JoinPage({ params }: Props) {
     );
   }
 
+  const reglamento = resolveReglamento(council.reglamento);
+
   return (
     <div className="relative z-10 flex min-h-dvh flex-col items-center justify-center px-6 py-16 text-center">
       <Logo size="md" withWordmark className="mb-5" />
@@ -39,6 +43,9 @@ export default async function JoinPage({ params }: Props) {
       <p className="font-body text-parchment/45 text-sm mt-4 max-w-[28ch]">
         Al unirte, aceptas el reglamento del Consejo.
       </p>
+      <div className="mt-4 w-full flex justify-center">
+        <ReglamentoPreview text={reglamento} />
+      </div>
       <div className="mt-8 w-full max-w-sm">
         <JoinCouncilForm token={token} />
       </div>

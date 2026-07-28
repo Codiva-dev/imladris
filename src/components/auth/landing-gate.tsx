@@ -6,7 +6,9 @@ import { Logo } from "@/components/brand/logo";
 import { Reveal } from "@/components/council/phase-transition";
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
+import { useToast } from "@/components/ui/toast";
 import { authClient } from "@/lib/auth-client";
+import { reportClientError } from "@/lib/client-log";
 import { ritualEase } from "@/lib/motion";
 
 type GatePhase = "closed" | "open" | "entering";
@@ -14,6 +16,7 @@ type GatePhase = "closed" | "open" | "entering";
 /** Landing: botón cerrado → se abre el umbral → se pliega al entrar. */
 export function LandingGate() {
   const reduce = useReducedMotion();
+  const { error: toastError } = useToast();
   const [phase, setPhase] = useState<GatePhase>("closed");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -25,14 +28,26 @@ export function LandingGate() {
     setError(null);
     setPending(true);
 
+    const normalizedEmail = email.trim().toLowerCase();
     const { error: signInError } = await authClient.signIn.email({
-      email: email.trim().toLowerCase(),
+      email: normalizedEmail,
       password,
     });
 
     if (signInError) {
       setPending(false);
-      setError(signInError.message ?? "No se pudo entrar.");
+      const message = signInError.message ?? "No se pudo entrar.";
+      setError(message);
+      toastError(message);
+      reportClientError({
+        scope: "landing.signin",
+        message,
+        fields: {
+          email: normalizedEmail,
+          code: "SIGNIN_FAILED",
+          authMessage: signInError.message,
+        },
+      });
       return;
     }
 

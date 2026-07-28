@@ -1,17 +1,31 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
-import { normalizeUsername } from "@/lib/username";
+import { useToast } from "@/components/ui/toast";
+import { authClient } from "@/lib/auth-client";
+import { reportClientError } from "@/lib/client-log";
+import { normalizeUsername, validateUsername } from "@/lib/username";
 
 type Props = {
   token: string;
 };
 
+function friendlyAuthError(message: string | undefined): string {
+  if (!message) return "No se pudo crear la cuenta.";
+  const lower = message.toLowerCase();
+  if (lower.includes("already") || lower.includes("exist")) {
+    return "Ese correo ya tiene cuenta. Entra desde el inicio.";
+  }
+  if (lower.includes("invitación") || lower.includes("invitation")) {
+    return "El enlace no pudo abrir la puerta. Pide uno nuevo al organizador.";
+  }
+  return message;
+}
+
 export function JoinCouncilForm({ token }: Props) {
-  const router = useRouter();
+  const { error: toastError } = useToast();
   const [name, setName] = useState("");
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
@@ -19,10 +33,43 @@ export function JoinCouncilForm({ token }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
 
+  function showError(
+    message: string,
+    fields?: Record<string, unknown>,
+  ) {
+    setError(message);
+    toastError(message);
+    reportClientError({
+      scope: "join.form",
+      message,
+      fields: {
+        ...fields,
+        email: email.trim().toLowerCase() || undefined,
+        username: normalizeUsername(username) || undefined,
+      },
+    });
+  }
+
   async function onSubmit(event: React.FormEvent) {
     event.preventDefault();
     setError(null);
+
+    const handle = normalizeUsername(username);
+    const usernameError = validateUsername(handle);
+    if (usernameError) {
+      showError(usernameError, { code: "USERNAME_INVALID" });
+      return;
+    }
+
+    if (password.length < 8) {
+      showError("La contraseña debe tener al menos 8 caracteres.", {
+        code: "PASSWORD_SHORT",
+      });
+      return;
+    }
+
     setPending(true);
+    const normalizedEmail = email.trim().toLowerCase();
 
     try {
       const res = await fetch("/api/join", {
@@ -30,33 +77,57 @@ export function JoinCouncilForm({ token }: Props) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           token,
-          name,
-          username: normalizeUsername(username),
-          email,
-          password,
+          email: normalizedEmail,
         }),
       });
-      const data = (await res.json()) as { error?: string };
-      if (!res.ok) throw new Error(data.error ?? "No se pudo unir");
-
-      const { authClient } = await import("@/lib/auth-client");
-      const { error: signInError } = await authClient.signIn.email({
-        email: email.trim().toLowerCase(),
-        password,
-      });
-      if (signInError) {
-        router.replace("/");
+      const data = (await res.json()) as {
+        error?: string;
+        code?: string;
+      };
+      if (!res.ok) {
+        showError(data.error ?? "No se pudo unir", {
+          code: data.code ?? `HTTP_${res.status}`,
+          status: res.status,
+          step: "prepare",
+        });
+        setPending(false);
         return;
       }
+
+      const { error: signUpError } = await authClient.signUp.email({
+        email: normalizedEmail,
+        password,
+        name: name.trim(),
+        username: handle,
+      } as {
+        email: string;
+        password: string;
+        name: string;
+        username: string;
+      });
+
+      if (signUpError) {
+        showError(friendlyAuthError(signUpError.message), {
+          code: "SIGNUP_FAILED",
+          step: "signup",
+          authMessage: signUpError.message,
+        });
+        setPending(false);
+        return;
+      }
+
       window.location.href = "/";
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error");
+      showError(err instanceof Error ? err.message : "Error", {
+        code: "JOIN_EXCEPTION",
+        step: "unknown",
+      });
       setPending(false);
     }
   }
 
   return (
-    <form onSubmit={onSubmit} className="flex flex-col gap-4">
+    <form onSubmit={onSubmit} className="flex flex-col gap-4" noValidate>
       <Field
         label="Nombre"
         required
@@ -71,9 +142,11 @@ export function JoinCouncilForm({ token }: Props) {
         onChange={(e) => setUsername(e.target.value.replace(/^@+/, ""))}
         autoComplete="username"
         placeholder="tu_nombre"
+        title="3–24 caracteres: empieza con letra; luego letras, números o _"
       />
       <p className="font-body text-parchment/40 text-xs text-left -mt-2">
-        Se mostrará como @{normalizeUsername(username) || "…"}
+        Se mostrará como @{normalizeUsername(username) || "…"}. Solo letras,
+        números y _; empieza con letra.
       </p>
       <Field
         label="Correo"

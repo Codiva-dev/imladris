@@ -1,10 +1,12 @@
 import { AcceptInviteForm } from "@/components/auth/accept-invite-form";
+import { ReglamentoPreview } from "@/components/auth/reglamento-preview";
 import { Logo } from "@/components/brand/logo";
 import { isRitualSealed, RITUAL_SEAL_MESSAGE } from "@/lib/constants";
 import {
   getInvitationByToken,
   invitationIsAcceptable,
 } from "@/lib/invitations";
+import { resolveReglamento } from "@/lib/reglamento";
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 
@@ -22,7 +24,7 @@ export default async function InvitePage({ params }: Props) {
 
   const council = await prisma.council.findUnique({
     where: { id: invitation.councilId },
-    select: { phase: true, name: true },
+    select: { phase: true, name: true, reglamento: true },
   });
 
   if (isRitualSealed(council?.phase)) {
@@ -39,6 +41,8 @@ export default async function InvitePage({ params }: Props) {
     );
   }
 
+  const reglamento = resolveReglamento(council?.reglamento);
+
   return (
     <div className="relative z-10 flex min-h-dvh flex-col items-center justify-center px-6 py-16 text-center">
       <Logo size="md" withWordmark className="mb-5" />
@@ -51,6 +55,9 @@ export default async function InvitePage({ params }: Props) {
       <p className="font-body text-parchment/45 text-sm mt-4 max-w-[28ch]">
         Al entrar, formas parte del círculo y su reglamento.
       </p>
+      <div className="mt-4 w-full flex justify-center">
+        <ReglamentoPreview text={reglamento} />
+      </div>
       <div className="mt-8 w-full max-w-sm">
         <AcceptInviteForm email={invitation.email} />
       </div>

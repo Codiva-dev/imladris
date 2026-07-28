@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { sendInvitationEmail } from "@/lib/email";
 import { rejectIfSealed } from "@/lib/council-access";
 import { createInvitation, inviteUrl } from "@/lib/invitations";
+import { log } from "@/lib/log";
 import { prisma } from "@/lib/prisma";
 
 export async function POST(request: Request) {
@@ -33,6 +34,9 @@ export async function POST(request: Request) {
   });
 
   if (!membership) {
+    log.warn("invitations", "Invitación denegada: no organizador", {
+      userId: session.user.id,
+    });
     return NextResponse.json(
       { error: "Solo el organizador puede invitar." },
       { status: 403 },
@@ -62,6 +66,13 @@ export async function POST(request: Request) {
       role: invitation.role,
     });
 
+    log.info("invitations", "Invitación enviada", {
+      invitationId: invitation.id,
+      email: invitation.email,
+      councilId: membership.councilId,
+      invitedById: session.user.id,
+    });
+
     return NextResponse.json({
       id: invitation.id,
       email: invitation.email,
@@ -70,6 +81,11 @@ export async function POST(request: Request) {
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "No se pudo crear la invitación";
+    log.error("invitations", "Fallo al invitar", {
+      email: body.email?.trim().toLowerCase(),
+      councilId: membership.councilId,
+      error,
+    });
     return NextResponse.json({ error: message }, { status: 400 });
   }
 }
