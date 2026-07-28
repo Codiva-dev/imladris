@@ -24,7 +24,7 @@ export function Button({
         variant === "primary" &&
           "bg-gold text-forest hover:bg-[#d4b87a] active:bg-[#b89555]",
         variant === "ghost" &&
-          "bg-transparent text-parchment/80 border border-parchment/25 hover:border-gold/50 hover:text-parchment",
+          "bg-transparent text-parchment/80 border border-parchment/20 hover:border-gold/45 hover:text-parchment hover:bg-parchment/[0.03]",
         className,
       )}
       {...props}

@@ -23,11 +23,12 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  memberships   CouncilMember[]
-  availabilities Availability[]
-  reflections   Reflection[]
-  sessions      Session[]
-  accounts      Account[]
+  memberships      CouncilMember[]
+  availabilities   Availability[]
+  reflections      Reflection[]
+  sessions         Session[]
+  accounts         Account[]
+  invitationsSent  Invitation[] @relation("InvitationsSent")
 
   @@map("users")
 }
@@ -117,6 +118,7 @@ model Council {
   rules           CouncilRules?
   knowledgeNodes  KnowledgeNode[]
   knowledgeEdges  KnowledgeEdge[]
+  invitations     Invitation[]
 
   @@map("councils")
 }
@@ -138,6 +140,34 @@ model CouncilMember {
 enum MemberRole {
   ORGANIZADOR
   MIEMBRO
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  REVOKED
+}
+
+/// Acceso solo por invitación: token de un uso, email fijado, caducidad.
+model Invitation {
+  id          String           @id @default(cuid())
+  councilId   String
+  email       String
+  role        MemberRole       @default(MIEMBRO)
+  token       String           @unique
+  status      InvitationStatus @default(PENDING)
+  invitedById String
+  expiresAt   DateTime
+  acceptedAt  DateTime?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  council     Council          @relation(fields: [councilId], references: [id], onDelete: Cascade)
+  invitedBy   User             @relation("InvitationsSent", fields: [invitedById], references: [id], onDelete: Cascade)
+
+  @@index([councilId, email, status])
+  @@index([expiresAt])
+  @@map("invitations")
 }
 
 // ─────────────────────────────────────────────

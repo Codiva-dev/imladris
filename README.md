@@ -23,21 +23,32 @@ Repositorio: [Bohemianmage/imladris](https://github.com/Bohemianmage/imladris)
 
 - Next.js 15 (App Router) · TypeScript · Tailwind CSS v4
 - Zustand · TanStack Query · Framer Motion
-- Prisma · PostgreSQL · Better Auth (pendiente de cablear)
+- Prisma · Neon Postgres · Better Auth (solo por invitación)
 - React Three Fiber (mapa, cuando aporte valor narrativo)
-- Vercel + Neon/Supabase
+- Vercel
 
-## Arranque local
+## Infra
+
+- **Neon** vive en Vercel (Production / Preview / Development). No hace falta Postgres local.
+- En cada deploy: `prisma migrate deploy` crea/actualiza tablas.
+- Auth: Better Auth; el primer usuario entra por `/fundar`; el resto solo con enlace de invitación.
+
+### Variables en Vercel
+
+| Variable | Origen |
+|----------|--------|
+| `DATABASE_URL` | Neon (Marketplace) |
+| `BETTER_AUTH_SECRET` | Secreto aleatorio (32+ bytes hex) |
+| `BETTER_AUTH_URL` | URL de producción, p. ej. `https://imladris-seven.vercel.app` |
+
+## Arranque local (UI / ritual sin DB)
 
 ```bash
 npm install
-cp .env.example .env
-# Configura DATABASE_URL (Neon o Supabase)
-npx prisma migrate dev --name init
 npm run dev
 ```
 
-Abre [http://localhost:3000](http://localhost:3000).
+Abre [http://localhost:3000](http://localhost:3000). Auth e invitaciones corren contra Neon en los deploys de Vercel.
 
 ## Design Constitution
 
@@ -46,9 +57,14 @@ Las reglas inviolables viven en `.cursor/rules/`. Si una decisión las contradic
 ## Estado del arranque
 
 - [x] Scaffold + identidad visual + portal (estado CERRADO / CONVOCATORIA)
-- [x] Schema Prisma de los cinco dominios
+- [x] Schema Prisma de los cinco dominios + invitaciones
 - [x] Motor de coincidencias y motor de reglas (sin IA)
-- [ ] Auth (Better Auth)
+- [x] Better Auth invite-only (fundar + `/invitar/[token]`)
+- [x] Transición unificada (velo) entre fases y rutas
+- [x] Stubs `/bitacora` y `/mapa` (miembro)
+- [x] Iconos / logo Lucide (SVG + PNG + PWA)
+- [ ] Email de invitación (Resend — conectado; falta cablear en código)
+- [ ] Vars Better Auth + deploy (`BETTER_AUTH_*`, dominio imladris.online)
 - [ ] API Route Handlers por dominio
 - [ ] UI completa de cada fase
 - [ ] PWA offline + Web Push
