@@ -41,7 +41,6 @@ export async function POST(
 
   const body = (await request.json()) as {
     topicId?: string;
-    approachId?: string | null;
     optionalMaterial?: string | null;
   };
 
@@ -49,12 +48,21 @@ export async function POST(
     return NextResponse.json({ error: "topicId requerido" }, { status: 400 });
   }
 
+  const approaches = await prisma.approach.findMany({
+    where: { councilId: membership.councilId },
+    select: { id: true },
+  });
+  const approachId =
+    approaches.length > 0
+      ? approaches[Math.floor(Math.random() * approaches.length)]!.id
+      : null;
+
   try {
     await persistMeetingSelection({
       councilId: membership.councilId,
       meetingId,
       topicId: body.topicId,
-      approachId: body.approachId?.trim() || null,
+      approachId,
       optionalMaterial: body.optionalMaterial?.trim() || null,
       nextPhase: "CUENTA_REGRESIVA",
     });
@@ -65,18 +73,33 @@ export async function POST(
     return NextResponse.json({ error: message }, { status });
   }
 
-  const topic = await prisma.topic.findUnique({
-    where: { id: body.topicId },
-    select: { title: true },
-  });
+  const [topic, approach] = await Promise.all([
+    prisma.topic.findUnique({
+      where: { id: body.topicId },
+      select: { title: true },
+    }),
+    approachId
+      ? prisma.approach.findUnique({
+          where: { id: approachId },
+          select: { name: true },
+        })
+      : null,
+  ]);
 
   await notifyCouncilMembers(membership.councilId, {
     title: "Tema elegido",
     body: topic?.title
-      ? `El Consejo hablará de «${topic.title}».`
+      ? approach?.name
+        ? `«${topic.title}» · ${approach.name}`
+        : `El Consejo hablará de «${topic.title}».`
       : "Ya hay tema para el próximo Consejo.",
     url: "/",
   });
 
-  return NextResponse.json({ ok: true, phase: "CUENTA_REGRESIVA" });
+  return NextResponse.json({
+    ok: true,
+    phase: "CUENTA_REGRESIVA",
+    approachId,
+    approachName: approach?.name ?? null,
+  });
 }

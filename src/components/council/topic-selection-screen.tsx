@@ -40,7 +40,6 @@ export function TopicSelectionScreen({ meeting, isOrganizer }: Props) {
   const [payload, setPayload] = useState<CandidatesPayload | null>(null);
   const [loading, setLoading] = useState(true);
   const [topicId, setTopicId] = useState<string | null>(null);
-  const [approachId, setApproachId] = useState<string | null>(null);
   const [material, setMaterial] = useState("");
   const [adding, setAdding] = useState(false);
   const [newTitle, setNewTitle] = useState("");
@@ -60,10 +59,6 @@ export function TopicSelectionScreen({ meeting, isOrganizer }: Props) {
       setTopicId((prev) => {
         if (prev && data.candidates.some((c) => c.id === prev)) return prev;
         return data.candidates[0]?.id ?? null;
-      });
-      setApproachId((prev) => {
-        if (prev && data.approaches.some((a) => a.id === prev)) return prev;
-        return data.approaches[0]?.id ?? null;
       });
     } catch (e) {
       setError(e instanceof Error ? e.message : "Error");
@@ -127,7 +122,6 @@ export function TopicSelectionScreen({ meeting, isOrganizer }: Props) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           topicId,
-          approachId,
           optionalMaterial: material.trim() || null,
         }),
       });
@@ -253,31 +247,9 @@ export function TopicSelectionScreen({ meeting, isOrganizer }: Props) {
           )}
 
           {payload && payload.approaches.length > 0 ? (
-            <div className="flex flex-col gap-3">
-              <p className="font-subtitle text-parchment/35 text-sm tracking-[0.16em] uppercase">
-                Enfoque
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {payload.approaches.map((a) => {
-                  const selected = approachId === a.id;
-                  return (
-                    <button
-                      key={a.id}
-                      type="button"
-                      onClick={() => setApproachId(a.id)}
-                      className={cn(
-                        "min-h-11 px-4 rounded-sm border font-subtitle text-base transition-colors",
-                        selected
-                          ? "border-gold/55 text-gold bg-gold/[0.07]"
-                          : "border-parchment/15 text-parchment/70 hover:border-parchment/30",
-                      )}
-                    >
-                      {a.name}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
+            <p className="font-subtitle text-parchment/45 text-sm text-center">
+              El enfoque se sortea al confirmar.
+            </p>
           ) : null}
 
           <label className="flex flex-col gap-1.5 text-left">

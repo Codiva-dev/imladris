@@ -4,11 +4,13 @@
  */
 export const DEFAULT_REGLAMENTO = `## Propósito
 
-Somos un círculo cerrado que se reúne para pensar en serio. No es un club social ni un hilo de mensajes: es el compromiso de presentarse, sostener una pregunta y salir con algo más claro que cuando se entró. Lo que queda escrito alimenta la memoria del Consejo.
+Venimos a pensar. No a opinar de prisa ni a acumular conversación vacía.
+
+El Consejo existe para nutrir la mente y el espíritu: sostener preguntas difíciles, mirarlas con calma y salir un poco más enteros. Cada reunión es un acto deliberado de atención compartida.
 
 ## Fecha
 
-Cuando bastantes miembros coinciden en un horario, el organizador elige y confirma. La app no fija fechas por su cuenta.
+Cuando suficientes miembros coinciden en un horario, el organizador elige y confirma.
 
 ## Reunión
 
@@ -24,7 +26,11 @@ Al cerrar la reunión, quedan **72 horas** para dejar una nota: reflexión, idea
 
 ## Temas
 
-En la convocatoria, cada miembro puede proponer hasta dos temas. Van al banco. El organizador elige entre los candidatos que permiten las reglas de selección, y un enfoque para orientar la conversación.
+En la convocatoria, cada miembro puede proponer hasta dos temas. Van al banco. El organizador elige entre los candidatos que permiten las reglas de selección. El enfoque se sortea al azar entre el pool del Consejo.
+
+## Mapa
+
+El mapa es la memoria visible del Consejo. Cada tema tratado se vuelve una estrella. Las notas compartidas de la bitácora dejan ecos ligados a ese tema. Con el tiempo se forma un cielo: lo que pensamos juntos, visto de un vistazo.
 `;
 
 export function resolveReglamento(stored: string | null | undefined): string {

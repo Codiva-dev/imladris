@@ -25,7 +25,11 @@ const targets = [
 ];
 
 for (const { file, size } of targets) {
-  const buf = await sharp(svg).resize(size, size).png().toBuffer();
+  const buf = await sharp(svg)
+    .resize(size, size)
+    .ensureAlpha()
+    .png()
+    .toBuffer();
   writeFileSync(file, buf);
   console.log("wrote", file.replace(root, ""), `(${size}×${size})`);
 }
