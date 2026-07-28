@@ -56,7 +56,7 @@ export function MemberHome({
       const data = (await res.json()) as { error?: string; joinUrl?: string };
       if (!res.ok) throw new Error(data.error ?? "Error");
       await invalidate();
-      setRotateMsg("Enlace renovado — el anterior ya no sirve");
+      setRotateMsg("Enlace renovado. El anterior ya no sirve");
       if (data.joinUrl) {
         try {
           await navigator.clipboard.writeText(data.joinUrl);
