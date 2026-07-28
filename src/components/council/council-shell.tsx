@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { LandingGate } from "@/components/auth/landing-gate";
 import { TransitionSlot } from "@/components/atmosphere/transition-slot";
 import { AvailabilityScreen } from "@/components/council/availability-screen";
@@ -12,17 +13,35 @@ import { QuorumScreen } from "@/components/council/quorum-screen";
 import { TopicSelectionScreen } from "@/components/council/topic-selection-screen";
 import { authClient } from "@/lib/auth-client";
 import { useCouncilMe } from "@/hooks/use-council-me";
+import { isRitualSealed } from "@/lib/constants";
 
-export function CouncilShell() {
+/** Volver desde Espacios: abre el portal aunque haya fase activa (no durante el sello). */
+export const PORTAL_HREF = "/?portal=1";
+
+function CouncilShellInner() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const preferPortal = searchParams.get("portal") === "1";
   const { data: session, isPending: sessionPending } = authClient.useSession();
   const { data, isPending, isError, refetch } = useCouncilMe(Boolean(session));
   const [drafting, setDrafting] = useState(false);
   const [forceAvailability, setForceAvailability] = useState(false);
 
+  const phase = data?.council.phase;
+  const sealed = Boolean(
+    data?.sealed || (phase && isRitualSealed(phase)),
+  );
+
   useEffect(() => {
     if (!session) return;
     void refetch();
   }, [session, refetch]);
+
+  useEffect(() => {
+    if (sealed && preferPortal) {
+      router.replace("/");
+    }
+  }, [sealed, preferPortal, router]);
 
   if (sessionPending || (session && isPending && !data)) {
     return <div className="min-h-dvh" aria-busy="true" aria-label="Cargando" />;
@@ -36,7 +55,7 @@ export function CouncilShell() {
     );
   }
 
-  if (isError || !data) {
+  if (isError || !data || !phase) {
     return (
       <div className="relative z-10 flex min-h-dvh items-center justify-center px-6">
         <button
@@ -50,12 +69,14 @@ export function CouncilShell() {
     );
   }
 
-  const phase = data.council.phase;
   const isOrganizer = data.role === "ORGANIZADOR";
   const meeting = data.meeting;
 
   let view = "home";
-  if (drafting) view = "convocation";
+  // Sello: solo la pantalla del Consejo. Sin portal ni otras vistas.
+  if (sealed && meeting) view = "meeting";
+  else if (preferPortal && !sealed) view = "home";
+  else if (drafting) view = "convocation";
   else if (forceAvailability && meeting) view = "availability";
   else if (phase === "DISPONIBILIDAD" && meeting) view = "availability";
   else if (phase === "QUORUM_ALCANZADO" && meeting) view = "quorum";
@@ -68,8 +89,13 @@ export function CouncilShell() {
   ) {
     view = "meeting";
   } else if (phase === "BITACORA_ABIERTA") view = "bitacora";
-  else if (phase === "CERRADO") view = "home";
   else view = "home";
+
+  function enterActiveMeeting() {
+    setForceAvailability(false);
+    router.replace("/");
+    void refetch();
+  }
 
   return (
     <TransitionSlot transitionKey={`${view}-${phase}`} skipInitial>
@@ -109,13 +135,24 @@ export function CouncilShell() {
           isOrganizer={isOrganizer}
           hasActiveMeeting={Boolean(meeting) && phase !== "CERRADO"}
           joinUrl={data.council.joinUrl}
-          onStartConvocation={() => setDrafting(true)}
-          onOpenMeeting={() => {
-            setForceAvailability(false);
-            void refetch();
+          organizerLabel={data.organizer?.label ?? null}
+          onStartConvocation={() => {
+            router.replace("/");
+            setDrafting(true);
           }}
+          onOpenMeeting={enterActiveMeeting}
         />
       ) : null}
     </TransitionSlot>
+  );
+}
+
+export function CouncilShell() {
+  return (
+    <Suspense
+      fallback={<div className="min-h-dvh" aria-busy="true" aria-label="Cargando" />}
+    >
+      <CouncilShellInner />
+    </Suspense>
   );
 }

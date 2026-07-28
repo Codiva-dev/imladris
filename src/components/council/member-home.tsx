@@ -1,11 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import { useState } from "react";
 import { Logo } from "@/components/brand/logo";
 import { InviteForm } from "@/components/auth/invite-form";
 import { Reveal } from "@/components/council/phase-transition";
-import { PushOptIn } from "@/components/pwa/push-opt-in";
 import { Button } from "@/components/ui/button";
 import { useInvalidateCouncil } from "@/hooks/use-council-me";
 import { authClient } from "@/lib/auth-client";
@@ -14,6 +12,7 @@ type Props = {
   isOrganizer: boolean;
   hasActiveMeeting: boolean;
   joinUrl: string | null;
+  organizerLabel: string | null;
   onStartConvocation: () => void;
   onOpenMeeting: () => void;
 };
@@ -22,6 +21,7 @@ export function MemberHome({
   isOrganizer,
   hasActiveMeeting,
   joinUrl,
+  organizerLabel,
   onStartConvocation,
   onOpenMeeting,
 }: Props) {
@@ -31,6 +31,8 @@ export function MemberHome({
   const [copied, setCopied] = useState(false);
   const [rotating, setRotating] = useState(false);
   const [rotateMsg, setRotateMsg] = useState<string | null>(null);
+  const [passing, setPassing] = useState(false);
+  const [passMsg, setPassMsg] = useState<string | null>(null);
 
   async function signOut() {
     await authClient.signOut();
@@ -73,6 +75,29 @@ export function MemberHome({
     }
   }
 
+  async function passOrganization() {
+    setPassing(true);
+    setPassMsg(null);
+    try {
+      const res = await fetch("/api/council/organizer", { method: "POST" });
+      const data = (await res.json()) as {
+        error?: string;
+        organizer?: { label: string };
+      };
+      if (!res.ok) throw new Error(data.error ?? "No se pudo ceder");
+      await invalidate();
+      setPassMsg(
+        data.organizer?.label
+          ? `Organiza ahora ${data.organizer.label}`
+          : "Organización cedida",
+      );
+    } catch (e) {
+      setPassMsg(e instanceof Error ? e.message : "Error");
+    } finally {
+      setPassing(false);
+    }
+  }
+
   return (
     <div className="relative z-10 flex min-h-dvh flex-col items-center justify-center px-6 py-20 sm:py-24 text-center">
       <Reveal>
@@ -90,6 +115,12 @@ export function MemberHome({
         className="mt-16 w-full max-w-sm flex flex-col gap-8"
       >
         <div className="flex flex-col gap-4">
+          {organizerLabel ? (
+            <p className="font-subtitle text-parchment/50 text-sm">
+              Organiza {organizerLabel}
+            </p>
+          ) : null}
+
           {hasActiveMeeting ? (
             <Button
               className="w-full shadow-[0_0_28px_rgba(200,169,107,0.18)]"
@@ -106,6 +137,27 @@ export function MemberHome({
             >
               Nueva convocatoria
             </Button>
+          ) : null}
+
+          {isOrganizer && !hasActiveMeeting ? (
+            <>
+              <Button
+                className="w-full"
+                variant="ghost"
+                disabled={passing}
+                onClick={() => void passOrganization()}
+              >
+                {passing ? "Cediendo…" : "Ceder organización"}
+              </Button>
+              {passMsg ? (
+                <p
+                  className="font-subtitle text-parchment/45 text-xs"
+                  role="status"
+                >
+                  {passMsg}
+                </p>
+              ) : null}
+            </>
           ) : null}
         </div>
 
@@ -150,34 +202,23 @@ export function MemberHome({
             Espacios
           </p>
           <div className="grid grid-cols-1 gap-3">
-            <Link href="/perfil">
-              <Button variant="ghost" className="w-full">
-                Perfil
-              </Button>
-            </Link>
-            <Link href="/reglamento">
-              <Button variant="ghost" className="w-full">
-                Reglamento
-              </Button>
-            </Link>
-            <Link href="/bitacora">
-              <Button variant="ghost" className="w-full">
-                Bitácora
-              </Button>
-            </Link>
-            <Link href="/mapa">
-              <Button variant="ghost" className="w-full">
-                Mapa
-              </Button>
-            </Link>
+            <Button href="/perfil" variant="ghost" className="w-full">
+              Perfil
+            </Button>
+            <Button href="/reglamento" variant="ghost" className="w-full">
+              Reglamento
+            </Button>
+            <Button href="/bitacora" variant="ghost" className="w-full">
+              Bitácora
+            </Button>
+            <Button href="/mapa" variant="ghost" className="w-full">
+              Mapa
+            </Button>
             {isOrganizer ? (
-              <Link href="/banco">
-                <Button variant="ghost" className="w-full">
-                  Banco
-                </Button>
-              </Link>
+              <Button href="/banco" variant="ghost" className="w-full">
+                Banco
+              </Button>
             ) : null}
-            <PushOptIn />
           </div>
         </div>
 

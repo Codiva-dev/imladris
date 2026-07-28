@@ -37,6 +37,17 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Enlace no válido" }, { status: 404 });
   }
 
+  if (council.phase === "CUENTA_REGRESIVA" || council.phase === "EN_CURSO") {
+    return NextResponse.json(
+      {
+        error:
+          "El Consejo está reunido. La puerta permanece cerrada hasta que termine.",
+        sealed: true,
+      },
+      { status: 423 },
+    );
+  }
+
   const organizerId = council.members[0]?.userId;
   if (!organizerId) {
     return NextResponse.json(

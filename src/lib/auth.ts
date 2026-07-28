@@ -54,7 +54,7 @@ export const auth = betterAuth({
           });
           if (taken) {
             throw new APIError("BAD_REQUEST", {
-              message: "Ese handle ya está tomado.",
+              message: "Ese identificador ya está tomado.",
             });
           }
 
@@ -73,6 +73,20 @@ export const auth = betterAuth({
           if (!invitation) {
             throw new APIError("FORBIDDEN", {
               message: "El Consejo solo abre su puerta por invitación.",
+            });
+          }
+
+          const council = await prisma.council.findUnique({
+            where: { id: invitation.councilId },
+            select: { phase: true },
+          });
+          if (
+            council?.phase === "CUENTA_REGRESIVA" ||
+            council?.phase === "EN_CURSO"
+          ) {
+            throw new APIError("FORBIDDEN", {
+              message:
+                "El Consejo está reunido. La puerta permanece cerrada hasta que termine.",
             });
           }
 

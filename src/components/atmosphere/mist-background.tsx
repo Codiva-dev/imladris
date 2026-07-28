@@ -8,7 +8,7 @@ export function MistBackground() {
 
   return (
     <div
-      className="pointer-events-none absolute inset-0 overflow-hidden"
+      className="pointer-events-none fixed inset-0 overflow-hidden"
       aria-hidden
     >
       <div className="absolute inset-0 bg-[#15241e]" />

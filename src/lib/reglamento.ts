@@ -8,6 +8,12 @@ Venimos a pensar. No a opinar de prisa ni a acumular conversación vacía.
 
 El Consejo existe para nutrir la mente y el espíritu: sostener preguntas difíciles, mirarlas con calma y salir un poco más enteros. Cada reunión es un acto deliberado de atención compartida.
 
+## Organización
+
+Cualquier miembro del círculo puede ser organizador. Quien organiza no vuelve a hacerlo hasta que todos los demás hayan pasado por el cargo. Cuando la ronda se completa, vuelve a empezar.
+
+Al cerrar una reunión (tras la bitácora), la organización pasa al siguiente miembro que aún no haya organizado en esa ronda. También puede cederse a mano cuando no hay convocatoria abierta.
+
 ## Fecha
 
 Cuando suficientes miembros coinciden en un horario, el organizador elige y confirma.
@@ -26,7 +32,7 @@ Al cerrar la reunión, quedan **72 horas** para dejar una nota: reflexión, idea
 
 ## Temas
 
-En la convocatoria, cada miembro puede proponer hasta dos temas. Van al banco. El organizador elige entre los candidatos que permiten las reglas de selección. El enfoque se sortea al azar entre el pool del Consejo.
+En la convocatoria, cada miembro puede proponer hasta dos temas. Van al banco. El organizador elige entre los candidatos que permiten las reglas de selección. El enfoque se sortea al azar entre los enfoques del Consejo.
 
 ## Mapa
 

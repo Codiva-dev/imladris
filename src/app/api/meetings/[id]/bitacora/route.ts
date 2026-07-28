@@ -4,6 +4,7 @@ import {
   getMembershipForUser,
   requireSessionUser,
 } from "@/lib/council-access";
+import { isRitualSealed, RITUAL_SEAL_MESSAGE } from "@/lib/constants";
 import { prisma } from "@/lib/prisma";
 
 /** Organizador cierra el Consejo y abre la ventana de bitácora. */
@@ -27,6 +28,13 @@ export async function POST(
   });
   if (!meeting) {
     return NextResponse.json({ error: "Reunión no encontrada" }, { status: 404 });
+  }
+
+  if (isRitualSealed(meeting.phase) && meeting.phase !== "EN_CURSO") {
+    return NextResponse.json(
+      { error: RITUAL_SEAL_MESSAGE, sealed: true },
+      { status: 423 },
+    );
   }
 
   try {

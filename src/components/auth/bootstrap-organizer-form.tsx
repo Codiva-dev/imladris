@@ -58,7 +58,7 @@ export function BootstrapOrganizerForm({ initialEmail = "" }: Props) {
         autoComplete="name"
       />
       <Field
-        label="Handle"
+        label="Identificador"
         required
         value={username}
         onChange={(e) => setUsername(e.target.value.replace(/^@+/, ""))}

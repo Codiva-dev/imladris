@@ -2,9 +2,11 @@ import { NextResponse } from "next/server";
 import type { AttendanceStatus } from "@prisma/client";
 import {
   getMembershipForUser,
+  rejectIfSealed,
   requireSessionUser,
 } from "@/lib/council-access";
 import { prisma } from "@/lib/prisma";
+import { isRitualSealed, RITUAL_SEAL_MESSAGE } from "@/lib/constants";
 
 const STATUSES: AttendanceStatus[] = ["VOY", "TAL_VEZ", "NO_VOY"];
 
@@ -24,6 +26,9 @@ export async function PUT(
     return NextResponse.json({ error: "Sin Consejo" }, { status: 404 });
   }
 
+  const sealed = await rejectIfSealed(membership.councilId);
+  if (sealed) return sealed;
+
   const meeting = await prisma.meeting.findFirst({
     where: { id: meetingId, councilId: membership.councilId },
     select: { id: true, phase: true, confirmedAt: true },
@@ -42,10 +47,16 @@ export async function PUT(
 
   if (
     meeting.phase === "CERRADO" ||
-    meeting.phase === "BITACORA_ABIERTA"
+    meeting.phase === "BITACORA_ABIERTA" ||
+    isRitualSealed(meeting.phase)
   ) {
     return NextResponse.json(
-      { error: "Ya no se puede cambiar la asistencia" },
+      {
+        error: isRitualSealed(meeting.phase)
+          ? RITUAL_SEAL_MESSAGE
+          : "Ya no se puede cambiar la asistencia",
+        sealed: isRitualSealed(meeting.phase) || undefined,
+      },
       { status: 409 },
     );
   }

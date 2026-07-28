@@ -3,6 +3,7 @@ import { randomBytes } from "node:crypto";
 import {
   appOrigin,
   getMembershipForUser,
+  rejectIfSealed,
   requireSessionUser,
 } from "@/lib/council-access";
 import { joinUrl } from "@/lib/invitations";
@@ -23,6 +24,9 @@ export async function POST() {
   if (!membership || membership.role !== "ORGANIZADOR") {
     return NextResponse.json({ error: "Solo el organizador" }, { status: 403 });
   }
+
+  const sealed = await rejectIfSealed(membership.councilId);
+  if (sealed) return sealed;
 
   const updated = await prisma.council.update({
     where: { id: membership.councilId },

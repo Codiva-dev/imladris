@@ -3,6 +3,7 @@ import type { AvailabilityStatus } from "@prisma/client";
 import { refreshMeetingProposals } from "@/domains/coordination/proposals";
 import {
   getMembershipForUser,
+  rejectIfSealed,
   requireSessionUser,
 } from "@/lib/council-access";
 import { prisma } from "@/lib/prisma";
@@ -25,6 +26,9 @@ export async function PUT(
   if (!membership) {
     return NextResponse.json({ error: "Sin Consejo" }, { status: 404 });
   }
+
+  const sealed = await rejectIfSealed(membership.councilId);
+  if (sealed) return sealed;
 
   const meeting = await prisma.meeting.findFirst({
     where: { id: meetingId, councilId: membership.councilId },

@@ -13,7 +13,7 @@ type Props = {
  */
 export function AppFrame({ children }: Props) {
   return (
-    <div className="relative min-h-dvh overflow-hidden">
+    <div className="relative min-h-dvh overflow-x-hidden">
       <MistBackground />
       {children}
     </div>

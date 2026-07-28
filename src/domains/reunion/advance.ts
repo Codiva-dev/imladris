@@ -9,6 +9,7 @@ import { sendBitacoraOpenEmail } from "@/lib/email";
 import { notifyCouncilMembers } from "@/lib/push";
 import { prisma } from "@/lib/prisma";
 import { ensureTopicStar } from "@/domains/mapa/stars";
+import { advanceOrganizer } from "@/domains/council/organizer-rotation";
 
 /** Avanza fases por el reloj: cuenta regresiva → en curso → bitácora → cerrado. */
 export async function advanceCouncilLifecycle(councilId: string) {
@@ -51,6 +52,7 @@ export async function advanceCouncilLifecycle(councilId: string) {
     meeting.bitacoraClosesAt.getTime() <= now.getTime()
   ) {
     await setCouncilAndMeetingPhase(councilId, meeting.id, "CERRADO");
+    await advanceOrganizer(councilId);
     return "CERRADO";
   }
 
@@ -73,11 +75,8 @@ export async function openBitacoraWindow(
   });
 
   if (!meeting) throw new Error("Reunión no encontrada");
-  if (
-    meeting.phase !== "EN_CURSO" &&
-    meeting.phase !== "CUENTA_REGRESIVA" &&
-    meeting.phase !== "TEMA_SELECCIONADO"
-  ) {
+  // Solo desde EN_CURSO (la cuenta regresiva permanece sellada).
+  if (meeting.phase !== "EN_CURSO") {
     if (meeting.phase === "BITACORA_ABIERTA") return meeting;
     throw new Error("No se puede abrir la bitácora aún");
   }

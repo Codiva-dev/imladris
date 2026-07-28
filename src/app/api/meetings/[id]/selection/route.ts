@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { persistMeetingSelection } from "@/domains/selection";
 import {
   getMembershipForUser,
+  rejectIfSealed,
   requireSessionUser,
 } from "@/lib/council-access";
 import { notifyCouncilMembers } from "@/lib/push";
@@ -22,6 +23,9 @@ export async function POST(
   if (!membership || membership.role !== "ORGANIZADOR") {
     return NextResponse.json({ error: "Solo el organizador" }, { status: 403 });
   }
+
+  const sealed = await rejectIfSealed(membership.councilId);
+  if (sealed) return sealed;
 
   const meeting = await prisma.meeting.findFirst({
     where: { id: meetingId, councilId: membership.councilId },

@@ -58,12 +58,12 @@ export function AcceptInviteForm({ email }: Props) {
         autoComplete="name"
       />
       <Field
-        label="Handle"
+        label="Identificador"
         required
         value={username}
         onChange={(e) => setUsername(e.target.value.replace(/^@+/, ""))}
         autoComplete="username"
-        placeholder="tu_handle"
+        placeholder="tu_nombre"
       />
       <p className="font-body text-parchment/40 text-xs text-left -mt-2">
         Se mostrará como @{normalizeUsername(username) || "…"}

@@ -54,4 +54,22 @@ export const MEETING_DOMINANT_PHASES: CouncilPhase[] = [
   "BITACORA_ABIERTA",
 ];
 
+/**
+ * Sello ritual: nadie entra al círculo ni altera nada.
+ * Solo contemplar el Consejo (cuenta regresiva / en curso).
+ */
+export const RITUAL_SEAL_PHASES: CouncilPhase[] = [
+  "CUENTA_REGRESIVA",
+  "EN_CURSO",
+];
+
+export function isRitualSealed(
+  phase: string | null | undefined,
+): phase is "CUENTA_REGRESIVA" | "EN_CURSO" {
+  return phase === "CUENTA_REGRESIVA" || phase === "EN_CURSO";
+}
+
+export const RITUAL_SEAL_MESSAGE =
+  "El Consejo está reunido. La puerta permanece cerrada hasta que termine.";
+
 export const BITACORA_WINDOW_HOURS = 72;

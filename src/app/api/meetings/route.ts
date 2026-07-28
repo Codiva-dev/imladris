@@ -4,6 +4,7 @@ import {
   appOrigin,
   getActiveMeeting,
   getMembershipForUser,
+  rejectIfSealed,
   requireSessionUser,
 } from "@/lib/council-access";
 import { sendConvocationEmail } from "@/lib/email";
@@ -23,6 +24,9 @@ export async function POST(request: Request) {
   if (!membership || membership.role !== "ORGANIZADOR") {
     return NextResponse.json({ error: "Solo el organizador" }, { status: 403 });
   }
+
+  const sealed = await rejectIfSealed(membership.councilId);
+  if (sealed) return sealed;
 
   const existing = await getActiveMeeting(membership.councilId);
   if (existing) {
@@ -110,6 +114,9 @@ export async function DELETE() {
   if (!membership || membership.role !== "ORGANIZADOR") {
     return NextResponse.json({ error: "Solo el organizador" }, { status: 403 });
   }
+
+  const sealed = await rejectIfSealed(membership.councilId);
+  if (sealed) return sealed;
 
   const meeting = await getActiveMeeting(membership.councilId);
   if (!meeting) {

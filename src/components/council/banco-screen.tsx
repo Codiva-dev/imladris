@@ -83,7 +83,7 @@ export function BancoScreen() {
           Solo el organizador gestiona el banco.
         </p>
         <Link
-          href="/"
+          href="/?portal=1"
           className="font-subtitle text-parchment/50 min-h-11 inline-flex items-center"
         >
           ← Volver
@@ -399,7 +399,7 @@ export function BancoScreen() {
       ) : null}
 
       <Link
-        href="/"
+        href="/?portal=1"
         className="font-subtitle text-parchment/45 text-center text-base min-h-11 inline-flex items-center justify-center hover:text-parchment/75 mt-auto pb-8"
       >
         ← Volver

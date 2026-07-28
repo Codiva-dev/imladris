@@ -110,10 +110,16 @@ export function PushOptIn() {
     }
   }
 
-  if (!supported || !enabled) return null;
+  if (!supported || !enabled) {
+    return (
+      <p className="font-body text-parchment/40 text-sm text-left">
+        Los avisos no están disponibles en este dispositivo.
+      </p>
+    );
+  }
 
   return (
-    <div className="flex flex-col gap-2 items-center w-full">
+    <div className="flex flex-col gap-2 w-full">
       <Button
         variant="ghost"
         className="w-full"
@@ -129,6 +135,10 @@ export function PushOptIn() {
       {message ? (
         <p className="font-subtitle text-parchment/40 text-xs" role="status">
           {message}
+        </p>
+      ) : subscribed && !message ? (
+        <p className="font-subtitle text-parchment/40 text-xs" role="status">
+          Avisos activos en este dispositivo
         </p>
       ) : null}
     </div>

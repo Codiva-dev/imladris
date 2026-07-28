@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import {
   getMembershipForUser,
+  rejectIfSealed,
   requireSessionUser,
 } from "@/lib/council-access";
 import { prisma } from "@/lib/prisma";
@@ -36,6 +37,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Solo el organizador" }, { status: 403 });
   }
 
+  const sealed = await rejectIfSealed(membership.councilId);
+  if (sealed) return sealed;
+
   const body = (await request.json()) as { name?: string };
   const name = body.name?.trim() ?? "";
   if (name.length < 2) {
@@ -66,6 +70,9 @@ export async function DELETE(request: Request) {
   if (!membership || membership.role !== "ORGANIZADOR") {
     return NextResponse.json({ error: "Solo el organizador" }, { status: 403 });
   }
+
+  const sealed = await rejectIfSealed(membership.councilId);
+  if (sealed) return sealed;
 
   const { searchParams } = new URL(request.url);
   const id = searchParams.get("id");

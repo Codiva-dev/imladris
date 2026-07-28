@@ -1,8 +1,13 @@
 import { headers } from "next/headers";
+import { NextResponse } from "next/server";
 import type { CouncilPhase, QuorumThreshold } from "@prisma/client";
 import { auth } from "@/lib/auth";
+import {
+  isRitualSealed,
+  RITUAL_SEAL_MESSAGE,
+  type QuorumPercent,
+} from "@/lib/constants";
 import { prisma } from "@/lib/prisma";
-import type { QuorumPercent } from "@/lib/constants";
 
 const QUORUM_MAP: Record<QuorumThreshold, QuorumPercent> = {
   P60: 60,
@@ -87,6 +92,40 @@ export async function setCouncilAndMeetingPhase(
       data: { phase },
     }),
   ]);
+}
+
+/** Lanza si el Consejo está en cuenta regresiva o en curso. */
+export async function assertCouncilNotSealed(councilId: string) {
+  const council = await prisma.council.findUnique({
+    where: { id: councilId },
+    select: { phase: true },
+  });
+  if (isRitualSealed(council?.phase)) {
+    throw new SealError(RITUAL_SEAL_MESSAGE);
+  }
+}
+
+export class SealError extends Error {
+  constructor(message = RITUAL_SEAL_MESSAGE) {
+    super(message);
+    this.name = "SealError";
+  }
+}
+
+/** Respuesta 423 si el Consejo está sellado; si no, null. */
+export async function rejectIfSealed(councilId: string) {
+  try {
+    await assertCouncilNotSealed(councilId);
+    return null;
+  } catch (e) {
+    if (e instanceof SealError) {
+      return NextResponse.json(
+        { error: e.message, sealed: true },
+        { status: 423 },
+      );
+    }
+    throw e;
+  }
 }
 
 export function appOrigin() {

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { MemberGate } from "@/components/auth/member-gate";
 import { Reveal } from "@/components/council/phase-transition";
+import { PushOptIn } from "@/components/pwa/push-opt-in";
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
 import { authClient } from "@/lib/auth-client";
@@ -108,7 +109,7 @@ function ProfileScreen() {
               autoComplete="name"
             />
             <Field
-              label="Handle"
+              label="Identificador"
               required
               value={username}
               onChange={(e) => setUsername(e.target.value.replace(/^@+/, ""))}
@@ -146,11 +147,21 @@ function ProfileScreen() {
               {pending ? "Guardando…" : "Guardar perfil"}
             </Button>
           </form>
+
+          <div className="flex flex-col gap-3 pt-4 border-t border-parchment/10">
+            <p className="font-subtitle text-parchment/35 text-sm tracking-[0.16em] uppercase">
+              Avisos
+            </p>
+            <p className="font-body text-parchment/45 text-sm text-left">
+              Recibe un aviso cuando el Consejo convoque, confirme fecha o abra la bitácora.
+            </p>
+            <PushOptIn />
+          </div>
         </Reveal>
       ) : null}
 
       <Link
-        href="/"
+        href="/?portal=1"
         className="font-subtitle text-parchment/45 text-center text-base min-h-11 inline-flex items-center justify-center hover:text-parchment/75 mt-auto pb-8"
       >
         ← Volver

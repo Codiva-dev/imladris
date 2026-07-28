@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { advanceCouncilLifecycle } from "@/domains/reunion";
+import { getOrganizerRotation } from "@/domains/council/organizer-rotation";
 import {
   appOrigin,
   getActiveMeeting,
@@ -8,7 +9,9 @@ import {
   requireSessionUser,
 } from "@/lib/council-access";
 import { joinUrl } from "@/lib/invitations";
+import { isRitualSealed } from "@/lib/constants";
 import { prisma } from "@/lib/prisma";
+import { publicLabel } from "@/lib/username";
 
 export async function GET() {
   const user = await requireSessionUser();
@@ -51,10 +54,25 @@ export async function GET() {
   );
 
   const isOrganizer = membership.role === "ORGANIZADOR";
+  const rotation = await getOrganizerRotation(membership.councilId);
+  const sealed = isRitualSealed(council.phase);
 
   return NextResponse.json({
     user: { id: user.id, name: user.name, email: user.email },
     role: membership.role,
+    sealed,
+    organizer: rotation.current
+      ? {
+          userId: rotation.current.userId,
+          label: publicLabel({
+            name: rotation.current.name,
+            username: rotation.current.username,
+          }),
+          pendingInRound: rotation.pendingCount,
+          servedInRound: rotation.servedCount,
+          memberCount: rotation.memberCount,
+        }
+      : null,
     council: {
       id: council.id,
       name: council.name,

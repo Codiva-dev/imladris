@@ -2,7 +2,6 @@
 
 import { format } from "date-fns";
 import { es } from "date-fns/locale/es";
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import { AttendanceBar } from "@/components/council/attendance-bar";
 import { Countdown } from "@/components/council/countdown";
@@ -12,12 +11,18 @@ import {
   useInvalidateCouncil,
   type CouncilMe,
 } from "@/hooks/use-council-me";
+import { isRitualSealed } from "@/lib/constants";
 
 type Props = {
   meeting: NonNullable<CouncilMe["meeting"]>;
   isOrganizer: boolean;
 };
 
+/**
+ * Pantalla del Consejo próximo / en curso.
+ * En cuenta regresiva y en curso: solo contemplación (sello ritual).
+ * Abrir bitácora solo en EN_CURSO (salida del sello).
+ */
 export function MeetingScreen({ meeting, isOrganizer }: Props) {
   const invalidate = useInvalidateCouncil();
   const selection = meeting.selection;
@@ -39,16 +44,12 @@ export function MeetingScreen({ meeting, isOrganizer }: Props) {
   }, [invalidate]);
 
   const underway = startsAt ? startsAt.getTime() <= now : false;
-  const canOpenBitacora =
-    isOrganizer &&
-    (meeting.phase === "EN_CURSO" ||
-      (meeting.phase === "CUENTA_REGRESIVA" && underway));
-
+  const sealed = isRitualSealed(meeting.phase);
+  const canOpenBitacora = isOrganizer && meeting.phase === "EN_CURSO";
   const showAttendance =
+    !sealed &&
     Boolean(meeting.confirmedAt) &&
-    (meeting.phase === "TEMA_SELECCIONADO" ||
-      meeting.phase === "CUENTA_REGRESIVA" ||
-      meeting.phase === "EN_CURSO");
+    meeting.phase === "TEMA_SELECCIONADO";
 
   async function openBitacora() {
     setPending(true);
@@ -72,7 +73,7 @@ export function MeetingScreen({ meeting, isOrganizer }: Props) {
     <div className="relative z-10 flex min-h-dvh flex-col items-center justify-center px-6 py-16 text-center max-w-lg mx-auto">
       <Reveal>
         <p className="font-subtitle text-parchment/35 text-sm tracking-[0.18em] uppercase mb-4">
-          {underway || meeting.phase === "EN_CURSO"
+          {meeting.phase === "EN_CURSO" || underway
             ? "En curso"
             : "Próximo Consejo"}
         </p>
@@ -127,7 +128,7 @@ export function MeetingScreen({ meeting, isOrganizer }: Props) {
         </Reveal>
       ) : null}
 
-      {selection?.optionalMaterial ? (
+      {selection?.optionalMaterial && !sealed ? (
         <Reveal delay={0.48} className="mt-8">
           {/^https?:\/\//i.test(selection.optionalMaterial) ? (
             <a
@@ -146,12 +147,30 @@ export function MeetingScreen({ meeting, isOrganizer }: Props) {
         </Reveal>
       ) : null}
 
+      {selection?.optionalMaterial && sealed ? (
+        <Reveal delay={0.48} className="mt-8">
+          <p className="font-body text-parchment/45 text-sm max-w-[32ch] mx-auto">
+            {/^https?:\/\//i.test(selection.optionalMaterial)
+              ? "Hay material de lectura preparado para el círculo."
+              : selection.optionalMaterial}
+          </p>
+        </Reveal>
+      ) : null}
+
       {showAttendance ? (
         <Reveal delay={0.5} className="mt-10 w-full max-w-sm">
           <AttendanceBar
             meetingId={meeting.id}
             attendance={meeting.attendance}
           />
+        </Reveal>
+      ) : null}
+
+      {sealed ? (
+        <Reveal delay={0.52} className="mt-10">
+          <p className="font-subtitle text-parchment/40 text-sm max-w-[28ch] mx-auto">
+            El círculo está en silencio. Nada más se mueve hasta que termine.
+          </p>
         </Reveal>
       ) : null}
 
@@ -172,15 +191,6 @@ export function MeetingScreen({ meeting, isOrganizer }: Props) {
           {error}
         </p>
       ) : null}
-
-      <Reveal delay={0.6} className="mt-8">
-        <Link
-          href="/mapa"
-          className="font-subtitle text-parchment/40 text-sm min-h-11 inline-flex items-center hover:text-parchment/70"
-        >
-          Mapa
-        </Link>
-      </Reveal>
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import {
   getMembershipForUser,
+  rejectIfSealed,
   requireSessionUser,
 } from "@/lib/council-access";
 import { prisma } from "@/lib/prisma";
@@ -19,6 +20,9 @@ export async function PATCH(
   if (!membership || membership.role !== "ORGANIZADOR") {
     return NextResponse.json({ error: "Solo el organizador" }, { status: 403 });
   }
+
+  const sealed = await rejectIfSealed(membership.councilId);
+  if (sealed) return sealed;
 
   const { id } = await context.params;
   const body = (await request.json()) as { status?: "ACTIVO" | "ARCHIVADO" };

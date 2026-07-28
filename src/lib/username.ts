@@ -1,4 +1,4 @@
-/** Handle único del Consejo — sin @; se muestra como @handle. */
+/** Identificador único del Consejo — sin @; se muestra como @nombre. */
 
 const USERNAME_RE = /^[A-Za-z][A-Za-z0-9_]{2,23}$/;
 
@@ -19,7 +19,7 @@ export function formatHandle(username: string | null | undefined): string | null
   return `@${normalizeUsername(username)}`;
 }
 
-/** Etiqueta pública: @handle si existe, si no el nombre. */
+/** Etiqueta pública: @identificador si existe, si no el nombre. */
 export function publicLabel(user: {
   name: string;
   username?: string | null;

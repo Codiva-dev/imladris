@@ -154,6 +154,8 @@ model CouncilMember {
   councilId String
   userId    String
   role      MemberRole @default(MIEMBRO)
+  /// Ya organizó en la ronda actual (no vuelve hasta que todos pasen).
+  hasOrganizedThisRound Boolean @default(false)
   joinedAt  DateTime @default(now())
 
   council   Council  @relation(fields: [councilId], references: [id], onDelete: Cascade)

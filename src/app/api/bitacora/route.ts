@@ -10,6 +10,7 @@ import {
 import { advanceCouncilLifecycle } from "@/domains/reunion";
 import {
   getMembershipForUser,
+  rejectIfSealed,
   requireSessionUser,
 } from "@/lib/council-access";
 import type { ReflectionKind, ReflectionVisibility } from "@prisma/client";
@@ -65,6 +66,9 @@ export async function POST(request: Request) {
   if (!membership) {
     return NextResponse.json({ error: "Sin Consejo" }, { status: 404 });
   }
+
+  const sealed = await rejectIfSealed(membership.councilId);
+  if (sealed) return sealed;
 
   await advanceCouncilLifecycle(membership.councilId);
 

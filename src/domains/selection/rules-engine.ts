@@ -83,7 +83,7 @@ export function pickCandidates(
 
 export type ApproachOption = { id: string; name: string };
 
-/** Enfoques del pool: mezcla determinista por `seed` (p. ej. meetingId). */
+/** Enfoques del Consejo: mezcla determinista por `seed` (p. ej. meetingId). */
 export function pickApproaches(
   approaches: ApproachOption[],
   count: number,

@@ -6,6 +6,14 @@ import type { CouncilPhase, QuorumPercent } from "@/lib/constants";
 export type CouncilMe = {
   user: { id: string; name: string; email: string };
   role: "ORGANIZADOR" | "MIEMBRO";
+  sealed: boolean;
+  organizer: {
+    userId: string;
+    label: string;
+    pendingInRound: number;
+    servedInRound: number;
+    memberCount: number;
+  } | null;
   council: {
     id: string;
     name: string;

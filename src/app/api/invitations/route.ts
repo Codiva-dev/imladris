@@ -2,9 +2,9 @@ import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { sendInvitationEmail } from "@/lib/email";
+import { rejectIfSealed } from "@/lib/council-access";
 import { createInvitation, inviteUrl } from "@/lib/invitations";
 import { prisma } from "@/lib/prisma";
-import type { MemberRole } from "@prisma/client";
 
 export async function POST(request: Request) {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -14,7 +14,6 @@ export async function POST(request: Request) {
 
   const body = (await request.json()) as {
     email?: string;
-    role?: MemberRole;
     councilId?: string;
   };
 
@@ -40,11 +39,14 @@ export async function POST(request: Request) {
     );
   }
 
+  const sealed = await rejectIfSealed(membership.councilId);
+  if (sealed) return sealed;
+
   try {
     const invitation = await createInvitation({
       councilId: membership.councilId,
       email: body.email,
-      role: body.role,
+      role: "MIEMBRO",
       invitedById: session.user.id,
     });
 

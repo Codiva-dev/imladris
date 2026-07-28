@@ -1,4 +1,4 @@
-const CACHE = "imladris-v1";
+const CACHE = "imladris-v2";
 const PRECACHE = [
   "/",
   "/manifest.webmanifest",
@@ -29,16 +29,10 @@ self.addEventListener("fetch", (event) => {
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
 
-  // Network-first for navigations and API; cache fallback for shell.
+  // Navegaciones: siempre red. No cachear HTML (rompe rutas / soft nav).
   if (request.mode === "navigate") {
     event.respondWith(
-      fetch(request)
-        .then((res) => {
-          const copy = res.clone();
-          void caches.open(CACHE).then((c) => c.put(request, copy));
-          return res;
-        })
-        .catch(() => caches.match(request).then((r) => r || caches.match("/"))),
+      fetch(request).catch(() => caches.match("/").then((r) => r || Response.error())),
     );
     return;
   }
@@ -93,7 +87,8 @@ self.addEventListener("push", (event) => {
 
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
-  const url = event.notification.data?.url || "/";
+  const raw = event.notification.data?.url || "/";
+  const url = new URL(raw, self.location.origin).href;
   event.waitUntil(
     self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clients) => {
       for (const client of clients) {

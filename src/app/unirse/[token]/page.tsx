@@ -1,5 +1,6 @@
 import { Logo } from "@/components/brand/logo";
 import { JoinCouncilForm } from "@/components/auth/join-council-form";
+import { isRitualSealed, RITUAL_SEAL_MESSAGE } from "@/lib/constants";
 import { getCouncilByJoinToken } from "@/lib/invitations";
 import { notFound } from "next/navigation";
 
@@ -13,6 +14,20 @@ export default async function JoinPage({ params }: Props) {
 
   if (!council) {
     notFound();
+  }
+
+  if (isRitualSealed(council.phase)) {
+    return (
+      <div className="relative z-10 flex min-h-dvh flex-col items-center justify-center px-6 py-16 text-center">
+        <Logo size="md" withWordmark className="mb-5" />
+        <h1 className="font-display text-parchment text-3xl sm:text-4xl max-w-[14ch]">
+          {council.name}
+        </h1>
+        <p className="font-body text-parchment/55 text-sm mt-6 max-w-[28ch]">
+          {RITUAL_SEAL_MESSAGE}
+        </p>
+      </div>
+    );
   }
 
   return (

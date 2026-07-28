@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 import {
   getMembershipForUser,
+  rejectIfSealed,
   requireSessionUser,
 } from "@/lib/council-access";
 import { auth } from "@/lib/auth";
@@ -12,7 +13,7 @@ import {
   validateUsername,
 } from "@/lib/username";
 
-/** Perfil del miembro: nombre, handle, correo, rol. */
+/** Perfil del miembro: nombre, identificador, correo, rol. */
 export async function GET() {
   const user = await requireSessionUser();
   if (!user) {
@@ -45,11 +46,17 @@ export async function GET() {
   });
 }
 
-/** Actualizar nombre y/ o handle. */
+/** Actualizar nombre y/ o identificador. */
 export async function PATCH(request: Request) {
   const user = await requireSessionUser();
   if (!user) {
     return NextResponse.json({ error: "No autenticado" }, { status: 401 });
+  }
+
+  const membership = await getMembershipForUser(user.id);
+  if (membership) {
+    const sealed = await rejectIfSealed(membership.councilId);
+    if (sealed) return sealed;
   }
 
   const body = (await request.json()) as { name?: string; username?: string };
@@ -87,7 +94,7 @@ export async function PATCH(request: Request) {
     });
     if (taken) {
       return NextResponse.json(
-        { error: "Ese handle ya está tomado." },
+        { error: "Ese identificador ya está tomado." },
         { status: 409 },
       );
     }
