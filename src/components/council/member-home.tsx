@@ -155,6 +155,11 @@ export function MemberHome({
                 Perfil
               </Button>
             </Link>
+            <Link href="/reglamento">
+              <Button variant="ghost" className="w-full">
+                Reglamento
+              </Button>
+            </Link>
             <Link href="/bitacora">
               <Button variant="ghost" className="w-full">
                 Bitácora

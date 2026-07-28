@@ -132,6 +132,8 @@ model Council {
   phase           CouncilPhase     @default(CERRADO)
   /// Enlace permanente para que nuevos miembros se unan.
   joinToken       String           @unique @default(cuid())
+  /// Pacto del círculo (markdown). Si es null, se usa el reglamento semilla.
+  reglamento      String?
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
 

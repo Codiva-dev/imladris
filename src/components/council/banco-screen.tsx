@@ -189,7 +189,7 @@ export function BancoScreen() {
           [
             ["temas", "Temas"],
             ["enfoques", "Enfoques"],
-            ["reglas", "Reglas"],
+            ["reglas", "Selección"],
           ] as const
         ).map(([id, label]) => (
           <button
@@ -387,7 +387,7 @@ export function BancoScreen() {
             ))}
 
             <Button type="submit" disabled={pending} className="w-full mt-2">
-              {pending ? "Guardando…" : "Guardar reglas"}
+              {pending ? "Guardando…" : "Guardar selección"}
             </Button>
             {saved ? (
               <p className="font-subtitle text-gold text-sm text-center" role="status">

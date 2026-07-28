@@ -9,7 +9,7 @@ import { authClient } from "@/lib/auth-client";
 
 type Props = {
   children: ReactNode;
-  domain?: "bitacora" | "mapa" | "banco" | "perfil";
+  domain?: "bitacora" | "mapa" | "banco" | "perfil" | "reglamento";
 };
 
 /**

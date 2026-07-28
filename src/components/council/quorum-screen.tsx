@@ -45,7 +45,7 @@ export function QuorumScreen({
     <div className="relative z-10 flex min-h-dvh flex-col px-6 py-10 max-w-lg mx-auto">
       <Reveal>
         <h1 className="font-display text-parchment text-3xl text-center">
-          Quórum alcanzado
+          Fechas posibles
         </h1>
       </Reveal>
 

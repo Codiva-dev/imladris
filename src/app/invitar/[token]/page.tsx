@@ -27,7 +27,10 @@ export default async function InvitePage({ params }: Props) {
       <p className="font-subtitle text-parchment/60 text-lg mt-3">
         {invitation.invitedBy.name}
       </p>
-      <div className="mt-10 w-full max-w-sm">
+      <p className="font-body text-parchment/45 text-sm mt-4 max-w-[28ch]">
+        Al entrar, formas parte del círculo y su reglamento.
+      </p>
+      <div className="mt-8 w-full max-w-sm">
         <AcceptInviteForm email={invitation.email} />
       </div>
     </div>

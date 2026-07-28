@@ -4,7 +4,6 @@ import {
   appOrigin,
   getActiveMeeting,
   getMembershipForUser,
-  quorumPercent,
   requireSessionUser,
 } from "@/lib/council-access";
 import { sendConvocationEmail } from "@/lib/email";
@@ -76,14 +75,12 @@ export async function POST(request: Request) {
   });
 
   const actionUrl = `${appOrigin()}/`;
-  const quorum = quorumPercent(membership.council.quorumThreshold);
 
   await Promise.allSettled(
     members.map((m) =>
       sendConvocationEmail({
         to: m.user.email,
         councilName: membership.council.name,
-        quorum,
         actionUrl,
       }),
     ),

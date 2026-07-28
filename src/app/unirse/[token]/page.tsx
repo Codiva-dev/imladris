@@ -21,7 +21,10 @@ export default async function JoinPage({ params }: Props) {
       <h1 className="font-display text-parchment text-3xl sm:text-4xl max-w-[14ch]">
         {council.name}
       </h1>
-      <div className="mt-10 w-full max-w-sm">
+      <p className="font-body text-parchment/45 text-sm mt-4 max-w-[28ch]">
+        Al unirte, aceptas el reglamento del Consejo.
+      </p>
+      <div className="mt-8 w-full max-w-sm">
         <JoinCouncilForm token={token} />
       </div>
     </div>

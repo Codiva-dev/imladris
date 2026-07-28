@@ -154,7 +154,6 @@ export function memberInviteEmail(input: {
 
 export function convocationEmail(input: {
   councilName: string;
-  quorum: number;
   actionUrl: string;
 }) {
   const council = escapeHtml(input.councilName);
@@ -163,8 +162,7 @@ export function convocationEmail(input: {
     html: emailShell({
       preheader: `Nueva convocatoria de ${input.councilName}. Indica tu disponibilidad.`,
       title: "Nueva convocatoria",
-      bodyHtml: `<p style="margin:0 0 12px;"><span style="color:${PARCHMENT};">${council}</span> abre una nueva convocatoria.</p>
-        <p style="margin:0;">Quórum: ${input.quorum}%</p>`,
+      bodyHtml: `<p style="margin:0;"> <span style="color:${PARCHMENT};">${council}</span> abre una nueva convocatoria. Indica tu disponibilidad y, si quieres, propón hasta dos temas.</p>`,
       ctaLabel: "Indicar disponibilidad",
       ctaUrl: input.actionUrl,
     }),

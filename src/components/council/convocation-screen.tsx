@@ -8,7 +8,6 @@ import { Field } from "@/components/ui/field";
 import { useInvalidateCouncil } from "@/hooks/use-council-me";
 
 type Props = {
-  quorum: number;
   onBack: () => void;
 };
 
@@ -24,7 +23,7 @@ function defaultSlot() {
   return toLocalInputValue(d);
 }
 
-export function ConvocationScreen({ quorum, onBack }: Props) {
+export function ConvocationScreen({ onBack }: Props) {
   const invalidate = useInvalidateCouncil();
   const [location, setLocation] = useState("");
   const [slots, setSlots] = useState<string[]>([defaultSlot()]);
@@ -75,9 +74,6 @@ export function ConvocationScreen({ quorum, onBack }: Props) {
         <h1 className="font-display text-parchment text-3xl text-center">
           Nueva convocatoria
         </h1>
-        <p className="font-subtitle text-parchment/55 text-center mt-2">
-          Quórum {quorum}%
-        </p>
       </Reveal>
 
       <Reveal delay={0.2} className="mt-8 flex flex-col gap-4 flex-1">

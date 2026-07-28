@@ -36,7 +36,7 @@ export const DEFAULT_APPROACHES = [
 export const PHASE_LABELS: Record<CouncilPhase, string> = {
   CONVOCATORIA: "Convocatoria",
   DISPONIBILIDAD: "Disponibilidad",
-  QUORUM_ALCANZADO: "Quórum alcanzado",
+  QUORUM_ALCANZADO: "Fechas posibles",
   FECHA_CONFIRMADA: "Fecha confirmada",
   TEMA_SELECCIONADO: "Tema seleccionado",
   CUENTA_REGRESIVA: "Cuenta regresiva",

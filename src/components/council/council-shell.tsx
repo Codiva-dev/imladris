@@ -74,10 +74,7 @@ export function CouncilShell() {
   return (
     <TransitionSlot transitionKey={`${view}-${phase}`} skipInitial>
       {view === "convocation" ? (
-        <ConvocationScreen
-          quorum={data.council.quorum}
-          onBack={() => setDrafting(false)}
-        />
+        <ConvocationScreen onBack={() => setDrafting(false)} />
       ) : null}
 
       {view === "availability" && meeting ? (

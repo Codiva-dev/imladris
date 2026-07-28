@@ -59,7 +59,6 @@ export async function sendFounderInviteEmail(input: {
 export async function sendConvocationEmail(input: {
   to: string;
   councilName: string;
-  quorum: number;
   actionUrl: string;
 }) {
   const template = convocationEmail(input);
