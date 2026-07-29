@@ -1,6 +1,6 @@
 import type { Transition, Variants } from "framer-motion";
 
-/** Easing ritual compartido — un solo lenguaje de movimiento. */
+/** Easing ritual compartido - un solo lenguaje de movimiento. */
 export const ritualEase = [0.22, 1, 0.36, 1] as const;
 
 export const viewTransition: Transition = {

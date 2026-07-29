@@ -1,4 +1,4 @@
-/** Identificador único del Consejo — sin @; se muestra como @nombre. */
+/** Identificador único del Consejo - sin @; se muestra como @nombre. */
 
 const USERNAME_RE = /^[A-Za-z][A-Za-z0-9_]{2,23}$/;
 

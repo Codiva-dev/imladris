@@ -30,7 +30,7 @@ export async function GET() {
     usingCustomDomain,
     domainStatus,
     hint: usingCustomDomain
-      ? "Remitente en imladris.online — verifica el dominio en Resend si los mails no llegan."
+      ? "Remitente en imladris.online - verifica el dominio en Resend si los mails no llegan."
       : "Configura RESEND_FROM_EMAIL=Imladris <consejo@imladris.online> y verifica el dominio en Resend.",
   });
 }

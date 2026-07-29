@@ -6,7 +6,7 @@ import {
 import { prisma } from "@/lib/prisma";
 import { formatHandle, publicLabel } from "@/lib/username";
 
-/** Miembros del Consejo — visibles para quien pertenece al círculo. */
+/** Miembros del Consejo - visibles para quien pertenece al círculo. */
 export async function GET() {
   const user = await requireSessionUser();
   if (!user) {

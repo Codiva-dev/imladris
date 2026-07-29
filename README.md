@@ -13,11 +13,11 @@ Repositorio: [Bohemianmage/imladris](https://github.com/Bohemianmage/imladris)
 
 ## Cinco dominios
 
-1. **Coordinación** — convocatoria, disponibilidad, quórum, propuestas de fecha
-2. **Selección** — banco de temas, enfoques, reglas del Consejo
-3. **Reunión** — cuenta regresiva y ritual del próximo Consejo
-4. **Bitácora** — reflexiones durante 72h tras finalizar
-5. **Mapa del Conocimiento** — huella visual de la historia intelectual
+1. **Coordinación** - convocatoria, disponibilidad, quórum, propuestas de fecha
+2. **Selección** - banco de temas, enfoques, reglas del Consejo
+3. **Reunión** - cuenta regresiva y ritual del próximo Consejo
+4. **Bitácora** - reflexiones durante 72h tras finalizar
+5. **Mapa del Conocimiento** - huella visual de la historia intelectual
 
 ## Stack
 
@@ -40,7 +40,7 @@ Repositorio: [Bohemianmage/imladris](https://github.com/Bohemianmage/imladris)
 | `DATABASE_URL` | Neon (Marketplace) |
 | `BETTER_AUTH_SECRET` | Secreto aleatorio (32+ bytes hex) |
 | `BETTER_AUTH_URL` | URL de producción, p. ej. `https://imladris.online` |
-| `RESEND_API_KEY` / `RESEND_FROM_EMAIL` | Resend — preferible `Imladris <consejo@imladris.online>` (dominio verificado) |
+| `RESEND_API_KEY` / `RESEND_FROM_EMAIL` | Resend - preferible `Imladris <consejo@imladris.online>` (dominio verificado) |
 | `NEXT_PUBLIC_VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` | Web Push (`npm run push:vapid`) |
 | `VAPID_SUBJECT` | `mailto:…` (opcional) |
 | `CRON_SECRET` | Secreto para `/api/cron/lifecycle` (además del header de Vercel Cron) |

@@ -28,7 +28,7 @@ type ShellProps = {
   footerNote?: string;
 };
 
-/** Envoltorio ritual compartido — manuscrito / bosque / oro. */
+/** Envoltorio ritual compartido - manuscrito / bosque / oro. */
 export function emailShell({
   preheader,
   title,

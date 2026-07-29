@@ -1,4 +1,4 @@
-// El Consejo de Elrond — esquema de los cinco dominios.
+// El Consejo de Elrond - esquema de los cinco dominios.
 // Nada fuera de Coordinación, Selección, Reunión, Bitácora, Mapa.
 
 generator client {
@@ -199,7 +199,7 @@ model Invitation {
 }
 
 // ─────────────────────────────────────────────
-// Dominio 1 — Coordinación
+// Dominio 1 - Coordinación
 // ─────────────────────────────────────────────
 
 model Meeting {
@@ -305,7 +305,7 @@ model DateProposal {
 }
 
 // ─────────────────────────────────────────────
-// Dominio 2 — Banco del Consejo (Selección)
+// Dominio 2 - Banco del Consejo (Selección)
 // ─────────────────────────────────────────────
 
 enum TopicStatus {
@@ -401,7 +401,7 @@ model MeetingSelection {
 }
 
 // ─────────────────────────────────────────────
-// Dominio 4 — Bitácora
+// Dominio 4 - Bitácora
 // ─────────────────────────────────────────────
 
 enum ReflectionVisibility {
@@ -436,7 +436,7 @@ model Reflection {
 }
 
 // ─────────────────────────────────────────────
-// Dominio 5 — Mapa del Conocimiento
+// Dominio 5 - Mapa del Conocimiento
 // ─────────────────────────────────────────────
 
 model KnowledgeNode {

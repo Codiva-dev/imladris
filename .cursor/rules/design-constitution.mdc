@@ -1,5 +1,5 @@
 ---
-description: Design Constitution — reglas inviolables de El Consejo de Elrond
+description: Design Constitution - reglas inviolables de El Consejo de Elrond
 alwaysApply: true
 ---
 
@@ -18,7 +18,7 @@ Si una decisión contradice estas reglas, recházala.
 9. **Rendimiento antes que espectacularidad.** 60 FPS en dispositivos modernos; carga inicial <3s en móvil razonable.
 10. **Persistencia del ritual.** Cada sesión deja huella en el mapa; con los años, la historia intelectual del Consejo.
 
-## Cinco dominios — nada más
+## Cinco dominios - nada más
 
 Coordinación · Selección (Temas / Enfoques / Reglas) · Reunión · Bitácora · Mapa del Conocimiento
 

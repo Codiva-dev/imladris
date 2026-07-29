@@ -1,2 +1,2 @@
-/** Dominio 3 — Reunión */
+/** Dominio 3 - Reunión */
 export { advanceCouncilLifecycle, openBitacoraWindow } from "./advance";

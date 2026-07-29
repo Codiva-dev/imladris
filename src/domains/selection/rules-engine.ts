@@ -1,5 +1,5 @@
 /**
- * Reglas del Consejo — sin IA. Solo filtros deterministas sobre el banco de temas.
+ * Reglas del Consejo - sin IA. Solo filtros deterministas sobre el banco de temas.
  */
 
 export type TopicCandidate = {

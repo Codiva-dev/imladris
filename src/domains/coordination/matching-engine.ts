@@ -1,5 +1,5 @@
 /**
- * Motor de coincidencias — busca el mejor escenario, no la unanimidad.
+ * Motor de coincidencias - busca el mejor escenario, no la unanimidad.
  * Nunca agenda: solo puntúa y ordena. El organizador confirma.
  */
 
@@ -26,9 +26,9 @@ function clampStars(score: number): 1 | 2 | 3 | 4 | 5 {
 }
 
 /**
- * @param memberCount — miembros del Consejo
- * @param quorumPercent — umbral (p.ej. 80)
- * @param slots — franjas con conteos de disponibilidad
+ * @param memberCount - miembros del Consejo
+ * @param quorumPercent - umbral (p.ej. 80)
+ * @param slots - franjas con conteos de disponibilidad
  */
 export function rankSlots(
   memberCount: number,

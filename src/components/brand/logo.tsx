@@ -17,7 +17,7 @@ const SIZE = {
 } as const;
 
 /**
- * Marca Imladris — hoja Lucide (+ wordmark opcional).
+ * Marca Imladris - hoja Lucide (+ wordmark opcional).
  */
 export function Logo({ className, size = "md", withWordmark = false }: Props) {
   return (

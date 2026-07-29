@@ -13,7 +13,7 @@ export function MistBackground() {
     >
       <div className="absolute inset-0 bg-[#15241e]" />
 
-      {/* Luz cálida desde arriba — como claro entre árboles */}
+      {/* Luz cálida desde arriba - como claro entre árboles */}
       <div
         className="absolute inset-0"
         style={{

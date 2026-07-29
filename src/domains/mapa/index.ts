@@ -1,4 +1,4 @@
-/** Dominio 5 — Mapa del Conocimiento */
+/** Dominio 5 - Mapa del Conocimiento */
 export {
   ensureReflectionStar,
   ensureTopicStar,

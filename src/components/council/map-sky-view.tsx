@@ -137,7 +137,7 @@ function Constellation({
   );
 }
 
-/** Cielo nocturno 3D — React Three Fiber con propósito narrativo. */
+/** Cielo nocturno 3D - React Three Fiber con propósito narrativo. */
 export function MapSkyView(props: Props) {
   const reduce = useReducedMotion();
 

@@ -1,4 +1,4 @@
-/** Dominio 2 — Banco / Selección */
+/** Dominio 2 - Banco / Selección */
 export {
   DEFAULT_RULES,
   filterTopicCandidates,

@@ -27,7 +27,7 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "El Consejo de Elrond",
   description:
-    "Imladris — la puerta de entrada a un lugar que solo cobra vida cuando el Consejo está por reunirse.",
+    "Imladris - la puerta de entrada a un lugar que solo cobra vida cuando el Consejo está por reunirse.",
   applicationName: "El Consejo de Elrond",
   metadataBase: new URL("https://imladris.online"),
   appleWebApp: {

@@ -15,7 +15,7 @@ function withTitle(
   };
 }
 
-/** Hoja Lucide — marca de Imladris. */
+/** Hoja Lucide - marca de Imladris. */
 export function LeafIcon({ title, ...props }: IconProps) {
   return <Leaf {...withTitle(title, props)} />;
 }

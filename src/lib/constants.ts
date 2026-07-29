@@ -1,4 +1,4 @@
-/** Fases únicas del Consejo — la UI vive en exactamente una. */
+/** Fases únicas del Consejo - la UI vive en exactamente una. */
 export const COUNCIL_PHASES = [
   "CONVOCATORIA",
   "DISPONIBILIDAD",
