@@ -17,10 +17,11 @@ function pad(n: number) {
 export function Countdown({ target, className, onComplete }: Props) {
   const [now, setNow] = useState(() => Date.now());
   const [completed, setCompleted] = useState(false);
+  const targetMs = target.getTime();
 
   useEffect(() => {
     setCompleted(false);
-  }, [target.getTime()]);
+  }, [targetMs]);
 
   useEffect(() => {
     let id: number | null = null;
@@ -53,7 +54,7 @@ export function Countdown({ target, className, onComplete }: Props) {
     };
   }, []);
 
-  const diff = Math.max(0, target.getTime() - now);
+  const diff = Math.max(0, targetMs - now);
 
   useEffect(() => {
     if (diff === 0 && !completed) {
