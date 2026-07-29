@@ -20,7 +20,7 @@ model User {
   email         String    @unique
   emailVerified Boolean   @default(false)
   image         String?
-  /// Handle único sin @ (p. ej. Bohemianmage → @Bohemianmage).
+  /// Handle único sin @ (p. ej. rivendell → @rivendell).
   username      String?   @unique
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt

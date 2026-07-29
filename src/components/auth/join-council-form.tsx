@@ -1,11 +1,18 @@
 "use client";
 
 import { useState } from "react";
+import { PasswordCriteria } from "@/components/auth/password-criteria";
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
+import { PasswordField } from "@/components/ui/password-field";
 import { useToast } from "@/components/ui/toast";
 import { authClient } from "@/lib/auth-client";
 import { reportClientError } from "@/lib/client-log";
+import {
+  isPasswordValid,
+  MIN_PASSWORD_LENGTH,
+  passwordValidationMessage,
+} from "@/lib/password";
 import { normalizeUsername, validateUsername } from "@/lib/username";
 
 type Props = {
@@ -61,10 +68,12 @@ export function JoinCouncilForm({ token }: Props) {
       return;
     }
 
-    if (password.length < 8) {
-      showError("La contraseña debe tener al menos 8 caracteres.", {
-        code: "PASSWORD_SHORT",
-      });
+    if (!isPasswordValid(password)) {
+      showError(
+        passwordValidationMessage(password) ??
+          "La contraseña no cumple los criterios.",
+        { code: "PASSWORD_INVALID" },
+      );
       return;
     }
 
@@ -156,15 +165,15 @@ export function JoinCouncilForm({ token }: Props) {
         onChange={(e) => setEmail(e.target.value)}
         autoComplete="email"
       />
-      <Field
+      <PasswordField
         label="Contraseña"
-        type="password"
         required
-        minLength={8}
+        minLength={MIN_PASSWORD_LENGTH}
         value={password}
         onChange={(e) => setPassword(e.target.value)}
         autoComplete="new-password"
       />
+      <PasswordCriteria password={password} />
       {error ? (
         <p className="font-body text-sm text-gold" role="alert">
           {error}

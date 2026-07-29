@@ -1,11 +1,30 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
-import { APIError } from "better-auth/api";
+import { APIError, createAuthMiddleware } from "better-auth/api";
 import { nextCookies } from "better-auth/next-js";
 import { DEFAULT_APPROACHES } from "@/lib/constants";
 import { log } from "@/lib/log";
 import { prisma } from "@/lib/prisma";
+import {
+  isPasswordValid,
+  MIN_PASSWORD_LENGTH,
+  passwordValidationMessage,
+} from "@/lib/password";
 import { normalizeUsername, validateUsername } from "@/lib/username";
+
+const PASSWORD_PATHS = new Set([
+  "/sign-up/email",
+  "/change-password",
+  "/reset-password",
+]);
+
+function passwordFromBody(body: unknown): string | null {
+  if (!body || typeof body !== "object") return null;
+  const record = body as Record<string, unknown>;
+  if (typeof record.password === "string") return record.password;
+  if (typeof record.newPassword === "string") return record.newPassword;
+  return null;
+}
 
 /**
  * Acceso solo por invitación (o primer usuario bootstrap).
@@ -19,7 +38,21 @@ export const auth = betterAuth({
   baseURL: process.env.BETTER_AUTH_URL,
   emailAndPassword: {
     enabled: true,
-    minPasswordLength: 8,
+    minPasswordLength: MIN_PASSWORD_LENGTH,
+  },
+  hooks: {
+    before: createAuthMiddleware(async (ctx) => {
+      if (!PASSWORD_PATHS.has(ctx.path)) return;
+      const password = passwordFromBody(ctx.body);
+      if (password === null) return;
+      if (!isPasswordValid(password)) {
+        throw new APIError("BAD_REQUEST", {
+          message:
+            passwordValidationMessage(password) ??
+            "La contraseña no cumple los criterios de seguridad.",
+        });
+      }
+    }),
   },
   user: {
     additionalFields: {
@@ -145,17 +178,6 @@ export const auth = betterAuth({
               },
             });
 
-            // Handle canónico del fundador si aún no vino en el signup
-            const current = await prisma.user.findUnique({
-              where: { id: user.id },
-              select: { username: true },
-            });
-            if (!current?.username) {
-              await prisma.user.update({
-                where: { id: user.id },
-                data: { username: "Bohemianmage" },
-              });
-            }
             log.info("auth.signup", "Consejo fundado", {
               email,
               userId: user.id,

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
+import { ChangePasswordForm } from "@/components/auth/change-password-form";
 import { MemberGate } from "@/components/auth/member-gate";
 import { Reveal } from "@/components/council/phase-transition";
 import { PushOptIn } from "@/components/pwa/push-opt-in";
@@ -147,6 +148,13 @@ function ProfileScreen() {
               {pending ? "Guardando…" : "Guardar perfil"}
             </Button>
           </form>
+
+          <div className="flex flex-col gap-4 pt-4 border-t border-parchment/10">
+            <p className="font-subtitle text-parchment/35 text-sm tracking-[0.16em] uppercase">
+              Contraseña
+            </p>
+            <ChangePasswordForm />
+          </div>
 
           <div className="flex flex-col gap-3 pt-4 border-t border-parchment/10">
             <p className="font-subtitle text-parchment/35 text-sm tracking-[0.16em] uppercase">

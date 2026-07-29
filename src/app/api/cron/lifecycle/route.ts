@@ -4,18 +4,14 @@ import { prisma } from "@/lib/prisma";
 
 /**
  * Cron Vercel: avanza fases de todos los consejos activos.
- * Auth: Authorization: Bearer $CRON_SECRET (o header x-vercel-cron).
+ * Auth: Authorization: Bearer $CRON_SECRET (obligatorio).
+ * Vercel Cron inyecta ese header cuando CRON_SECRET está configurado.
  */
 export async function GET(request: Request) {
   const authHeader = request.headers.get("authorization");
   const cronSecret = process.env.CRON_SECRET;
-  const vercelCron = request.headers.get("x-vercel-cron");
 
-  const authorized =
-    Boolean(vercelCron) ||
-    (cronSecret && authHeader === `Bearer ${cronSecret}`);
-
-  if (!authorized) {
+  if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
     return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   }
 

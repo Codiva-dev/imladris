@@ -1,6 +1,6 @@
 "use client";
 
-import { Leaf } from "lucide-react";
+import { LeafIcon } from "@/components/icons";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -17,7 +17,7 @@ const SIZE = {
 } as const;
 
 /**
- * Marca Imladris - hoja Lucide (+ wordmark opcional).
+ * Marca Imladris - hoja (+ wordmark opcional).
  */
 export function Logo({ className, size = "md", withWordmark = false }: Props) {
   return (
@@ -27,13 +27,11 @@ export function Logo({ className, size = "md", withWordmark = false }: Props) {
         className,
       )}
     >
-      <Leaf
+      <LeafIcon
         className={cn(
           SIZE[size],
           "drop-shadow-[0_0_18px_rgba(200,169,107,0.35)]",
         )}
-        strokeWidth={1.25}
-        aria-hidden
       />
       {withWordmark ? (
         <span className="font-subtitle text-gold text-2xl sm:text-3xl tracking-[0.12em]">

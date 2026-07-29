@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { Suspense, useState } from "react";
+import { Suspense } from "react";
 import { BootstrapOrganizerForm } from "@/components/auth/bootstrap-organizer-form";
 import { Logo } from "@/components/brand/logo";
 

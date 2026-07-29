@@ -36,6 +36,17 @@ export async function POST(request: Request) {
     );
   }
 
+  const council = await prisma.council.findUniqueOrThrow({
+    where: { id: membership.councilId },
+    select: { phase: true },
+  });
+  if (council.phase !== "CONVOCATORIA" && council.phase !== "CERRADO") {
+    return NextResponse.json(
+      { error: "Abre primero la convocatoria" },
+      { status: 409 },
+    );
+  }
+
   const body = (await request.json()) as {
     location?: string;
     slots?: SlotBody[];

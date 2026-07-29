@@ -46,6 +46,8 @@ export function MeetingScreen({ meeting, isOrganizer }: Props) {
   const underway = startsAt ? startsAt.getTime() <= now : false;
   const sealed = isRitualSealed(meeting.phase);
   const canOpenBitacora = isOrganizer && meeting.phase === "EN_CURSO";
+  const canStartCountdown =
+    isOrganizer && meeting.phase === "TEMA_SELECCIONADO";
   const showAttendance =
     !sealed &&
     Boolean(meeting.confirmedAt) &&
@@ -62,6 +64,23 @@ export function MeetingScreen({ meeting, isOrganizer }: Props) {
       if (!res.ok) throw new Error(data.error ?? "Error");
       await invalidate();
       window.location.href = "/bitacora";
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Error");
+    } finally {
+      setPending(false);
+    }
+  }
+
+  async function startCountdown() {
+    setPending(true);
+    setError(null);
+    try {
+      const res = await fetch(`/api/meetings/${meeting.id}/countdown`, {
+        method: "POST",
+      });
+      const data = (await res.json()) as { error?: string };
+      if (!res.ok) throw new Error(data.error ?? "Error");
+      await invalidate();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Error");
     } finally {
@@ -163,6 +182,21 @@ export function MeetingScreen({ meeting, isOrganizer }: Props) {
             meetingId={meeting.id}
             attendance={meeting.attendance}
           />
+        </Reveal>
+      ) : null}
+
+      {canStartCountdown ? (
+        <Reveal delay={0.52} className="mt-10 w-full max-w-sm">
+          <Button
+            className="w-full"
+            disabled={pending}
+            onClick={() => void startCountdown()}
+          >
+            {pending ? "Sellando…" : "Iniciar cuenta regresiva"}
+          </Button>
+          <p className="font-body text-parchment/40 text-xs mt-3">
+            Cierra la asistencia y sella el círculo.
+          </p>
         </Reveal>
       ) : null}
 

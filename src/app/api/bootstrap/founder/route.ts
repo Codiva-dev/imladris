@@ -1,11 +1,23 @@
 import { NextResponse } from "next/server";
 import { sendFounderInviteEmail } from "@/lib/email";
+import { prisma } from "@/lib/prisma";
 
 /**
- * Dispara el correo de fundador (una sola vez / bootstrap).
+ * Dispara el correo de fundador (bootstrap).
+ * Deshabilitado por defecto. Activar solo con ENABLE_FOUNDER_BOOTSTRAP=true
+ * y solo mientras no exista ningún usuario.
+ * Preferible: `npm run email:founder -- <email>`
+ *
  * Auth: Authorization: Bearer <BETTER_AUTH_SECRET>
  */
 export async function POST(request: Request) {
+  if (process.env.ENABLE_FOUNDER_BOOTSTRAP !== "true") {
+    return NextResponse.json(
+      { error: "Bootstrap deshabilitado. Usa el script local email:founder." },
+      { status: 410 },
+    );
+  }
+
   const expected = process.env.BETTER_AUTH_SECRET;
   const authHeader = request.headers.get("authorization");
   const token = authHeader?.startsWith("Bearer ")
@@ -14,6 +26,14 @@ export async function POST(request: Request) {
 
   if (!expected || token !== expected) {
     return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+  }
+
+  const existingUsers = await prisma.user.count();
+  if (existingUsers > 0) {
+    return NextResponse.json(
+      { error: "El Consejo ya fue fundado" },
+      { status: 409 },
+    );
   }
 
   const body = (await request.json().catch(() => ({}))) as {

@@ -11,7 +11,7 @@ import {
 import { notifyCouncilMembers } from "@/lib/push";
 import { prisma } from "@/lib/prisma";
 
-/** Organizador confirma tema (+ enfoque) → cuenta regresiva. */
+/** Organizador confirma tema (+ enfoque) → TEMA_SELECCIONADO. */
 export async function POST(
   request: Request,
   context: { params: Promise<{ id: string }> },
@@ -73,7 +73,7 @@ export async function POST(
       topicId: body.topicId,
       approachId,
       optionalMaterial: body.optionalMaterial?.trim() || null,
-      nextPhase: "CUENTA_REGRESIVA",
+      nextPhase: "TEMA_SELECCIONADO",
     });
   } catch (e) {
     const message = e instanceof Error ? e.message : "Error";
@@ -107,7 +107,7 @@ export async function POST(
 
   return NextResponse.json({
     ok: true,
-    phase: "CUENTA_REGRESIVA",
+    phase: "TEMA_SELECCIONADO",
     approachId,
     approachName: approach?.name ?? null,
   });

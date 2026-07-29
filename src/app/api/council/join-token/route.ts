@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { randomBytes } from "node:crypto";
 import {
   appOrigin,
   getMembershipForUser,
@@ -7,11 +6,8 @@ import {
   requireSessionUser,
 } from "@/lib/council-access";
 import { joinUrl } from "@/lib/invitations";
+import { newJoinToken } from "@/lib/join-token";
 import { prisma } from "@/lib/prisma";
-
-function newJoinToken() {
-  return randomBytes(24).toString("base64url");
-}
 
 /** Rota el enlace permanente de unión (invalida el anterior). */
 export async function POST() {

@@ -1,7 +1,7 @@
 "use client";
 
-import { Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
+import { PlusIcon, TrashIcon } from "@/components/icons";
 import { Reveal } from "@/components/council/phase-transition";
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
@@ -108,7 +108,7 @@ export function ConvocationScreen({ onBack }: Props) {
                   className="min-h-11 min-w-11 inline-flex items-center justify-center text-parchment/50 hover:text-gold"
                   onClick={() => setSlots((s) => s.filter((_, i) => i !== index))}
                 >
-                  <Trash2 className="h-4 w-4" strokeWidth={1.25} />
+                  <TrashIcon className="h-4 w-4" />
                 </button>
               ) : null}
             </div>
@@ -118,7 +118,7 @@ export function ConvocationScreen({ onBack }: Props) {
             onClick={addSlot}
             className="min-h-11 inline-flex items-center justify-center gap-2 font-subtitle text-gold/80 hover:text-gold"
           >
-            <Plus className="h-4 w-4" strokeWidth={1.25} />
+            <PlusIcon className="h-4 w-4" />
             Añadir franja
           </button>
         </div>

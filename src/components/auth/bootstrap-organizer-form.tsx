@@ -1,9 +1,16 @@
 "use client";
 
 import { useState } from "react";
+import { PasswordCriteria } from "@/components/auth/password-criteria";
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
+import { PasswordField } from "@/components/ui/password-field";
 import { authClient } from "@/lib/auth-client";
+import {
+  isPasswordValid,
+  MIN_PASSWORD_LENGTH,
+  passwordValidationMessage,
+} from "@/lib/password";
 import { normalizeUsername } from "@/lib/username";
 
 type Props = {
@@ -12,7 +19,7 @@ type Props = {
 
 export function BootstrapOrganizerForm({ initialEmail = "" }: Props) {
   const [name, setName] = useState("");
-  const [username, setUsername] = useState("Bohemianmage");
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState(initialEmail);
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -21,6 +28,15 @@ export function BootstrapOrganizerForm({ initialEmail = "" }: Props) {
   async function onSubmit(event: React.FormEvent) {
     event.preventDefault();
     setError(null);
+
+    if (!isPasswordValid(password)) {
+      setError(
+        passwordValidationMessage(password) ??
+          "La contraseña no cumple los criterios.",
+      );
+      return;
+    }
+
     setPending(true);
 
     const { error: signUpError } = await authClient.signUp.email({
@@ -63,7 +79,7 @@ export function BootstrapOrganizerForm({ initialEmail = "" }: Props) {
         value={username}
         onChange={(e) => setUsername(e.target.value.replace(/^@+/, ""))}
         autoComplete="username"
-        placeholder="Bohemianmage"
+        placeholder="tu_nombre"
       />
       <p className="font-body text-parchment/40 text-xs text-left -mt-2">
         Se mostrará como @{normalizeUsername(username) || "…"}
@@ -77,15 +93,15 @@ export function BootstrapOrganizerForm({ initialEmail = "" }: Props) {
         autoComplete="email"
         readOnly={Boolean(initialEmail)}
       />
-      <Field
+      <PasswordField
         label="Contraseña"
-        type="password"
         required
-        minLength={8}
+        minLength={MIN_PASSWORD_LENGTH}
         value={password}
         onChange={(e) => setPassword(e.target.value)}
         autoComplete="new-password"
       />
+      <PasswordCriteria password={password} />
 
       {error ? (
         <p className="font-body text-sm text-gold" role="alert">

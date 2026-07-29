@@ -11,14 +11,14 @@ type PersistInput = {
   nextPhase?: CouncilPhase;
 };
 
-/** Confirma tema (+ enfoque) y avanza a cuenta regresiva. */
+/** Confirma tema (+ enfoque) y avanza a TEMA_SELECCIONADO (asistencia abierta). */
 export async function persistMeetingSelection({
   councilId,
   meetingId,
   topicId,
   approachId,
   optionalMaterial,
-  nextPhase = "CUENTA_REGRESIVA",
+  nextPhase = "TEMA_SELECCIONADO",
 }: PersistInput) {
   const now = new Date();
 

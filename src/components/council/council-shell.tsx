@@ -76,7 +76,8 @@ function CouncilShellInner() {
   // Sello: solo la pantalla del Consejo. Sin portal ni otras vistas.
   if (sealed && meeting) view = "meeting";
   else if (preferPortal && !sealed) view = "home";
-  else if (drafting) view = "convocation";
+  else if (phase === "CONVOCATORIA" && isOrganizer) view = "convocation";
+  else if (drafting && isOrganizer) view = "convocation";
   else if (forceAvailability && meeting) view = "availability";
   else if (phase === "DISPONIBILIDAD" && meeting) view = "availability";
   else if (phase === "QUORUM_ALCANZADO" && meeting) view = "quorum";
@@ -97,10 +98,30 @@ function CouncilShellInner() {
     void refetch();
   }
 
+  async function startConvocation() {
+    router.replace("/");
+    const res = await fetch("/api/meetings/convocation", { method: "POST" });
+    if (!res.ok) {
+      const body = (await res.json().catch(() => ({}))) as { error?: string };
+      console.error(body.error ?? "No se pudo abrir la convocatoria");
+      return;
+    }
+    setDrafting(true);
+    void refetch();
+  }
+
+  async function cancelConvocationDraft() {
+    setDrafting(false);
+    if (phase === "CONVOCATORIA") {
+      await fetch("/api/meetings/convocation", { method: "DELETE" });
+      void refetch();
+    }
+  }
+
   return (
     <TransitionSlot transitionKey={`${view}-${phase}`} skipInitial>
       {view === "convocation" ? (
-        <ConvocationScreen onBack={() => setDrafting(false)} />
+        <ConvocationScreen onBack={() => void cancelConvocationDraft()} />
       ) : null}
 
       {view === "availability" && meeting ? (
@@ -137,8 +158,7 @@ function CouncilShellInner() {
           joinUrl={data.council.joinUrl}
           organizerLabel={data.organizer?.label ?? null}
           onStartConvocation={() => {
-            router.replace("/");
-            setDrafting(true);
+            void startConvocation();
           }}
           onOpenMeeting={enterActiveMeeting}
         />

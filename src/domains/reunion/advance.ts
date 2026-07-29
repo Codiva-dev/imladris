@@ -27,6 +27,24 @@ export async function advanceCouncilLifecycle(councilId: string) {
   if (!meeting) return null;
 
   const now = new Date();
+  const TWO_HOURS_MS = 2 * 60 * 60 * 1000;
+
+  // Tema elegido: sella a cuenta regresiva cerca de la hora (o pasa a EN_CURSO si ya empezó).
+  if (meeting.phase === "TEMA_SELECCIONADO" && meeting.startsAt) {
+    const starts = meeting.startsAt.getTime();
+    if (starts <= now.getTime()) {
+      await setCouncilAndMeetingPhase(councilId, meeting.id, "EN_CURSO");
+      return "EN_CURSO";
+    }
+    if (starts - now.getTime() <= TWO_HOURS_MS) {
+      await setCouncilAndMeetingPhase(
+        councilId,
+        meeting.id,
+        "CUENTA_REGRESIVA",
+      );
+      return "CUENTA_REGRESIVA";
+    }
+  }
 
   if (
     meeting.phase === "CUENTA_REGRESIVA" &&

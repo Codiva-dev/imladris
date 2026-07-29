@@ -10,6 +10,7 @@ import {
 } from "@/lib/council-access";
 import { joinUrl } from "@/lib/invitations";
 import { isRitualSealed } from "@/lib/constants";
+import { newJoinToken } from "@/lib/join-token";
 import { prisma } from "@/lib/prisma";
 import { publicLabel } from "@/lib/username";
 
@@ -30,7 +31,7 @@ export async function GET() {
   if (!joinToken) {
     const updated = await prisma.council.update({
       where: { id: membership.councilId },
-      data: { joinToken: crypto.randomUUID().replace(/-/g, "") },
+      data: { joinToken: newJoinToken() },
       select: { joinToken: true },
     });
     joinToken = updated.joinToken;

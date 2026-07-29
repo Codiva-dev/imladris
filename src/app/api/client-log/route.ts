@@ -1,38 +1,15 @@
 import { NextResponse } from "next/server";
+import { requireSessionUser } from "@/lib/council-access";
 import { log } from "@/lib/log";
 
 const MAX_MESSAGE = 400;
 const MAX_SCOPE = 80;
-const RATE_WINDOW_MS = 60_000;
-const RATE_MAX = 40;
 
-const hits = new Map<string, { count: number; resetAt: number }>();
-
-function clientKey(request: Request): string {
-  return (
-    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-    request.headers.get("x-real-ip") ||
-    "unknown"
-  );
-}
-
-function allow(key: string): boolean {
-  const now = Date.now();
-  const row = hits.get(key);
-  if (!row || row.resetAt <= now) {
-    hits.set(key, { count: 1, resetAt: now + RATE_WINDOW_MS });
-    return true;
-  }
-  if (row.count >= RATE_MAX) return false;
-  row.count += 1;
-  return true;
-}
-
-/** Ingesta de errores del cliente para Runtime Logs. */
+/** Ingesta de errores del cliente para Runtime Logs (solo sesión). */
 export async function POST(request: Request) {
-  const key = clientKey(request);
-  if (!allow(key)) {
-    return NextResponse.json({ ok: false }, { status: 429 });
+  const user = await requireSessionUser();
+  if (!user) {
+    return NextResponse.json({ error: "No autenticado" }, { status: 401 });
   }
 
   let body: {
@@ -56,9 +33,9 @@ export async function POST(request: Request) {
 
   const fields = {
     source: "client",
+    userId: user.id,
     path: typeof body.path === "string" ? body.path.slice(0, 120) : undefined,
     ua: typeof body.ua === "string" ? body.ua.slice(0, 180) : undefined,
-    ip: key === "unknown" ? undefined : key,
     ...(body.fields && typeof body.fields === "object" ? body.fields : {}),
   };
 

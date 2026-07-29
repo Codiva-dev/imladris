@@ -22,9 +22,9 @@ Repositorio: [Bohemianmage/imladris](https://github.com/Bohemianmage/imladris)
 ## Stack
 
 - Next.js 15 (App Router) · TypeScript · Tailwind CSS v4
-- Zustand · TanStack Query · Framer Motion
+- TanStack Query · Framer Motion
 - Prisma · Neon Postgres · Better Auth (solo por invitación)
-- React Three Fiber (mapa, cuando aporte valor narrativo)
+- React Three Fiber (mapa cielo, con propósito)
 - Vercel
 
 ## Infra
@@ -35,24 +35,36 @@ Repositorio: [Bohemianmage/imladris](https://github.com/Bohemianmage/imladris)
 
 ### Variables en Vercel
 
+Ver `.env.example`. Resumen:
+
 | Variable | Origen |
 |----------|--------|
 | `DATABASE_URL` | Neon (Marketplace) |
 | `BETTER_AUTH_SECRET` | Secreto aleatorio (32+ bytes hex) |
 | `BETTER_AUTH_URL` | URL de producción, p. ej. `https://imladris.online` |
-| `RESEND_API_KEY` / `RESEND_FROM_EMAIL` | Resend - preferible `Imladris <consejo@imladris.online>` (dominio verificado) |
+| `RESEND_API_KEY` / `RESEND_FROM_EMAIL` | Resend - preferible `Imladris <consejo@imladris.online>` |
 | `NEXT_PUBLIC_VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` | Web Push (`npm run push:vapid`) |
 | `VAPID_SUBJECT` | `mailto:…` (opcional) |
-| `CRON_SECRET` | Secreto para `/api/cron/lifecycle` (además del header de Vercel Cron) |
+| `CRON_SECRET` | **Obligatorio** para `/api/cron/lifecycle` |
 
-## Arranque local (UI / ritual sin DB)
+Bootstrap HTTP (`/api/bootstrap/founder`) está deshabilitado salvo `ENABLE_FOUNDER_BOOTSTRAP=true`. Preferible: `npm run email:founder -- <email>`.
+
+## Arranque local
 
 ```bash
+cp .env.example .env.local
+# rellenar secretos
 npm install
 npm run dev
 ```
 
-Abre [http://localhost:3000](http://localhost:3000). Auth e invitaciones corren contra Neon en los deploys de Vercel.
+Abre [http://localhost:3000](http://localhost:3000).
+
+```bash
+npm run lint
+npm test
+npx tsc --noEmit
+```
 
 ## Design Constitution
 
@@ -60,18 +72,17 @@ Las reglas inviolables viven en `.cursor/rules/`. Si una decisión las contradic
 
 ## Estado del arranque
 
-- [x] Scaffold + identidad visual + portal (estado CERRADO / CONVOCATORIA)
+- [x] Scaffold + identidad visual + portal
 - [x] Schema Prisma de los cinco dominios + invitaciones
 - [x] Motor de coincidencias y motor de reglas (sin IA)
 - [x] Better Auth invite-only (fundar + `/invitar/[token]`)
 - [x] Transición unificada (velo) entre fases y rutas
-- [x] Stubs `/bitacora` y `/mapa` (miembro)
-- [x] Iconos / logo Lucide (SVG + PNG + PWA)
+- [x] Bitácora (72h) + Mapa 2D / grafo / cielo 3D
 - [x] Landing con login (sin convocatoria pública)
 - [x] Invitaciones por email (Resend)
 - [x] Coordinación: convocatoria → disponibilidad → quórum → confirmación
-- [x] Selección (temas / enfoques / reglas)
+- [x] Selección (temas / enfoques / reglas) → TEMA_SELECCIONADO → cuenta regresiva
 - [x] Reunión dominante (countdown → en curso → bitácora)
-- [x] Bitácora real (72h) + Mapa 2D / grafo / cielo 3D
-- [x] PWA (service worker) + Web Push (opt-in)
-- [x] Asistencia, rotar enlace, cron de fases, remitente imladris.online
+- [x] PWA + Web Push (opt-in)
+- [x] Asistencia, rotar enlace, cron de fases (CRON_SECRET), remitente imladris.online
+- [x] CI (lint + tsc + tests de motores)
