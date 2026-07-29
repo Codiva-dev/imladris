@@ -21,7 +21,14 @@ export async function POST(request: Request) {
     name?: string;
   };
 
-  const email = (body.email ?? "").trim().toLowerCase();
+  const email = body.email?.trim().toLowerCase();
+  if (!email || !email.includes("@")) {
+    return NextResponse.json(
+      { error: "Indica un email válido en el body" },
+      { status: 400 },
+    );
+  }
+
   const base = (process.env.BETTER_AUTH_URL ?? "https://imladris.online").replace(
     /\/$/,
     "",

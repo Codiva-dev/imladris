@@ -1,6 +1,6 @@
 /**
  * Envía el correo de fundador.
- * Uso: node --env-file=.env.local scripts/send-founder-invite.mjs
+ * Uso: node --env-file=.env.local scripts/send-founder-invite.mjs <email>
  */
 import { Resend } from "resend";
 
@@ -9,7 +9,12 @@ const GOLD = "#C8A96B";
 const PARCHMENT = "#EFE6D3";
 const RIVENDELL = "#4F7A63";
 
-const TO = process.argv[2] ?? "";
+const TO = process.argv[2]?.trim().toLowerCase();
+if (!TO || !TO.includes("@")) {
+  console.error("Uso: node --env-file=.env.local scripts/send-founder-invite.mjs <email>");
+  process.exit(1);
+}
+
 const BASE = (process.env.BETTER_AUTH_URL ?? "https://imladris.online").replace(
   /\/$/,
   "",
