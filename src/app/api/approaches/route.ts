@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { ensureDefaultApproaches } from "@/domains/selection";
 import {
   getMembershipForUser,
   rejectIfSealed,
@@ -16,6 +17,8 @@ export async function GET() {
   if (!membership) {
     return NextResponse.json({ error: "Sin Consejo" }, { status: 404 });
   }
+
+  await ensureDefaultApproaches(membership.councilId);
 
   const approaches = await prisma.approach.findMany({
     where: { councilId: membership.councilId },

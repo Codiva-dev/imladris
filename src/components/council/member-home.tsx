@@ -205,6 +205,9 @@ export function MemberHome({
             <Button href="/perfil" variant="ghost" className="w-full">
               Perfil
             </Button>
+            <Button href="/miembros" variant="ghost" className="w-full">
+              Miembros
+            </Button>
             <Button href="/reglamento" variant="ghost" className="w-full">
               Reglamento
             </Button>

@@ -16,3 +16,4 @@ export {
   loadSelectionRules,
 } from "./candidates";
 export { persistMeetingSelection } from "./persist";
+export { ensureDefaultApproaches } from "./approaches";

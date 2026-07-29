@@ -12,7 +12,7 @@ import { isRitualSealed, RITUAL_SEAL_MESSAGE } from "@/lib/constants";
 
 type Props = {
   children: ReactNode;
-  domain?: "bitacora" | "mapa" | "banco" | "perfil" | "reglamento";
+  domain?: "bitacora" | "mapa" | "banco" | "perfil" | "reglamento" | "miembros";
 };
 
 /**

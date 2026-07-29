@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
-import { persistMeetingSelection } from "@/domains/selection";
+import {
+  ensureDefaultApproaches,
+  persistMeetingSelection,
+} from "@/domains/selection";
 import {
   getMembershipForUser,
   rejectIfSealed,
@@ -51,6 +54,8 @@ export async function POST(
   if (!body.topicId) {
     return NextResponse.json({ error: "topicId requerido" }, { status: 400 });
   }
+
+  await ensureDefaultApproaches(membership.councilId);
 
   const approaches = await prisma.approach.findMany({
     where: { councilId: membership.councilId },

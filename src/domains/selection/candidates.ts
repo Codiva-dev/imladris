@@ -7,6 +7,7 @@ import {
   type SelectionRules,
   type TopicCandidate,
 } from "./rules-engine";
+import { ensureDefaultApproaches } from "./approaches";
 import { prisma } from "@/lib/prisma";
 
 export async function loadSelectionRules(
@@ -56,6 +57,8 @@ export async function buildMeetingCandidates(meetingId: string, councilId: strin
     },
     orderBy: { title: "asc" },
   });
+
+  await ensureDefaultApproaches(councilId);
 
   const approaches = await prisma.approach.findMany({
     where: { councilId },
